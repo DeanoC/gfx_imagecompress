@@ -297,7 +297,7 @@ TEST_CASE("AMD BC5 Direct RG", "[ImageCompress]") {
 	Image_Destroy(image);
 	Image_Destroy(dst);
 }
-/*
+
 TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
 	auto image = Image_Create2D(32, 32, ImageFormat_R32G32B32A32_SFLOAT);
 	REQUIRE(image);
@@ -318,7 +318,7 @@ TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
 	Image_Destroy(image);
 	Image_Destroy(dst);
 }
-*/
+
 TEST_CASE("AMD BC7 Direct R", "[ImageCompress]") {
 	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
@@ -402,3 +402,49 @@ TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
 	Image_Destroy(image);
 	Image_Destroy(dst);
 }
+
+// test below this line are very slow in debug. So best to do the debuggin on the 32x32
+// versions
+#ifdef NDEBUG
+TEST_CASE("AMD BC6H Direct RGBA 256", "[ImageCompress]") {
+	auto image = Image_Create2D(256, 256, ImageFormat_R32G32B32A32_SFLOAT);
+	REQUIRE(image);
+	GenerateTestPatternFloatRGBA(image);
+	SAVE_DDS(image, "compress_ref_R8G8B8A8_SFLOAT_256x32.dds")
+
+	auto dst = Image_CompressAMDBC6H(image, nullptr, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == ImageFormat_BC6H_SFLOAT_BLOCK);
+
+	SAVE_DDS(dst, "compress_BC6H_SFLOAT_256x256.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+
+TEST_CASE("AMD BC7 Direct RGB 256", "[ImageCompress]") {
+	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	REQUIRE(image);
+	GenerateTestPatternRGB(image);
+	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_256x256.dds")
+
+	auto dst = Image_CompressAMDBC7(image, nullptr, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+
+	SAVE_DDS(dst, "compress_BC7_UNORM_256x256.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+#endif
