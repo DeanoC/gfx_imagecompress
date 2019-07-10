@@ -428,7 +428,7 @@ TEST_CASE("AMD BC6H Direct RGBA 256", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct RGB 256", "[ImageCompress]") {
-	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_256x256.dds")
