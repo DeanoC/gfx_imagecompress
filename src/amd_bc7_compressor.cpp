@@ -8,6 +8,8 @@
 #include "amd_bc6h_body.hpp"
 #include "amd_bc7_body.hpp"
 
+extern void init_ramps (void);
+
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader const *src,
 																														 Image_CompressAMDBackendOptions const *amdOptions,
 																														 Image_CompressProgressFunc progressCallback,
@@ -15,6 +17,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader c
 	if (src->depth > 1)
 		return nullptr;
 
+	init_ramps();
 	amdOptions = (amdOptions == nullptr) ? Image_CompressDefaultAmdOptions() : amdOptions;
 
 	bool const srcIsSRGB = ImageFormat_IsSRGB(src->format);

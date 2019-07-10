@@ -11,6 +11,42 @@
 #define SAVE_DDS(img, filename) { VFile::ScopedFile fh = VFile::File::FromFile("artifacts/" filename, Os_FM_WriteBinary); \
 	REQUIRE(fh); Image_SaveDDS(img, fh); }
 
+static void GenerateTestPatternR(Image_ImageHeader const* image) {
+	Image_PixelD const red = { 1, 0, 0, 1 };
+
+	for(auto y = 0u;y < image->height;++y) {
+		for(auto x = 0u;x < image->width;++x) {
+			size_t index = Image_CalculateIndex(image, x, y, 0, 0);
+			Image_PixelD col = red;
+			Image_SetPixelAt(image, &col, index);
+		}
+	}
+}
+
+static void GenerateTestPatternG(Image_ImageHeader const* image) {
+	Image_PixelD const green = { 0, 1, 0, 1 };
+
+	for(auto y = 0u;y < image->height;++y) {
+		for(auto x = 0u;x < image->width;++x) {
+			size_t index = Image_CalculateIndex(image, x, y, 0, 0);
+			Image_PixelD col = green;
+			Image_SetPixelAt(image, &col, index);
+		}
+	}
+}
+
+static void GenerateTestPatternB(Image_ImageHeader const* image) {
+	Image_PixelD const blue = { 0, 0, 1, 1 };
+
+	for(auto y = 0u;y < image->height;++y) {
+		for(auto x = 0u;x < image->width;++x) {
+			size_t index = Image_CalculateIndex(image, x, y, 0, 0);
+			Image_PixelD col = blue;
+			Image_SetPixelAt(image, &col, index);
+		}
+	}
+}
+
 static void GenerateTestPatternRGB(Image_ImageHeader const* image) {
 	Image_PixelD const red = { 1, 0, 0, 1 };
 	Image_PixelD const green = { 0, 1, 0, 1 };
@@ -283,6 +319,69 @@ TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
 	Image_Destroy(dst);
 }
 */
+TEST_CASE("AMD BC7 Direct R", "[ImageCompress]") {
+	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	REQUIRE(image);
+	GenerateTestPatternR(image);
+	SAVE_DDS(image, "compress_ref_R_R8G8B8_UNORM_32x32.dds")
+
+	auto dst = Image_CompressAMDBC7(image, nullptr, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+
+	SAVE_DDS(dst, "compress_R_BC7_UNORM_32x32.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+
+TEST_CASE("AMD BC7 Direct G", "[ImageCompress]") {
+	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	REQUIRE(image);
+	GenerateTestPatternG(image);
+	SAVE_DDS(image, "compress_ref_G_R8G8B8_UNORM_32x32.dds")
+
+	auto dst = Image_CompressAMDBC7(image, nullptr, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+
+	SAVE_DDS(dst, "compress_G_BC7_UNORM_32x32.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+
+TEST_CASE("AMD BC7 Direct B", "[ImageCompress]") {
+	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	REQUIRE(image);
+	GenerateTestPatternB(image);
+	SAVE_DDS(image, "compress_ref_B_R8G8B8_UNORM_32x32.dds")
+
+	auto dst = Image_CompressAMDBC7(image, nullptr, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+
+	SAVE_DDS(dst, "compress_B_BC7_UNORM_32x32.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+
 TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
 	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);

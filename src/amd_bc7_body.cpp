@@ -1293,8 +1293,8 @@ double BC7BlockEncoder::CompressBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_B
 																			uint8_t   out[COMPRESSED_BLOCK_SIZE])
 {
 	uint32_t   i, j;
-	bool    blockNeedsAlpha        = FALSE;
-	bool    blockAlphaZeroOne      = FALSE;
+	bool blockNeedsAlpha        = FALSE;
+	bool blockAlphaZeroOne      = FALSE;
 	uint32_t   validModeMask          = m_validModeMask;
 	bool    encodedBlock           = FALSE;
 
@@ -1310,6 +1310,7 @@ double BC7BlockEncoder::CompressBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_B
 	// Also check if the block encodes an explicit zero or one in the
 	// alpha channel. If so then we might need also need special as the
 	// block may have a thresholded or punch-through alpha
+
 	for(i=0; i<MAX_SUBSET_SIZE; i++)
 	{
 		if(in[i][COMP_ALPHA] < 1.0)
@@ -1341,6 +1342,9 @@ double BC7BlockEncoder::CompressBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_B
 	m_blockMaxRange = Math_MaxD(m_blockMaxRange, m_blockRange[2]);
 	m_blockMaxRange = Math_MaxD(m_blockMaxRange, m_blockRange[3]);
 
+	bool solidColour = false;
+	if(m_blockMaxRange < 1e-10) solidColour = true;
+
 	// Initial loop - go through the block modes and get the ones that are valid
 	for(uint32_t blockMode=0; blockMode < NUM_BLOCK_TYPES; blockMode++)
 	{
@@ -1365,7 +1369,8 @@ double BC7BlockEncoder::CompressBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_B
 		// become accidentally slightly transparent (it's possible that
 		// when encoding 3-component texture applications will assume that
 		// the 4th component can safely be assumed to be 1.0 all the time)
-		if((blockNeedsAlpha == FALSE) &&
+		if( !solidColour &&
+				(blockNeedsAlpha == FALSE) &&
 				(m_colourRestrict == TRUE) &&
 				(bti[blockMode].encodingType == COMBINED_ALPHA))
 		{
@@ -1399,7 +1404,10 @@ double BC7BlockEncoder::CompressBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_B
 	// modes are now enumerated earlier, so the first encoding that passes the threshold will
 	// tend to pass by a greater margin than if we used a dumb ordering, and thus overall error will
 	// be improved)
-	uint32_t   blockModeOrder[NUM_BLOCK_TYPES] = {4, 6, 3, 1, 0, 2, 7, 5};
+	// Deano pushed 6 to the front, as solid colour block have error 0 and so are pick the first
+	// block. 6 is the best for pure RGB colour blocks
+	// mode 0 is technically illegal so only try it last of all (6 should do its job well)
+	uint32_t   blockModeOrder[NUM_BLOCK_TYPES] = {6, 4, 3, 1, 2, 0, 7, 5 };
 
 	for(uint32_t j1=0; j1 < NUM_BLOCK_TYPES; j1++)
 	{
