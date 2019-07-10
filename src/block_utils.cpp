@@ -6,7 +6,26 @@ namespace ImageCompress {
 void ReadNxNBlock(Image_ImageHeader const *src,
 									uint32_t blockWidth,
 									uint32_t blockHeight,
+									bool forceAlphaTo1,
 									float *dst,
+									uint32_t sx,
+									uint32_t sy,
+									uint32_t sw) {
+
+	ASSERT(blockWidth*blockHeight < 12*12);
+	double tmp[12*12];
+	ReadNxNBlock(src, blockWidth, blockHeight, forceAlphaTo1, tmp, sx, sy, sw);
+
+	for(uint32_t i = 0u; i < blockWidth* blockHeight*4;++i) {
+		dst[i] = (float)tmp[i];
+	}
+}
+
+void ReadNxNBlock(Image_ImageHeader const *src,
+									uint32_t blockWidth,
+									uint32_t blockHeight,
+									bool forceAlphaTo1,
+									double *dst,
 									uint32_t sx,
 									uint32_t sy,
 									uint32_t sw) {
@@ -14,17 +33,24 @@ void ReadNxNBlock(Image_ImageHeader const *src,
 	uint32_t cy = sy;
 	for(uint32_t y = 0; y < blockHeight;++y) {
 		uint32_t cx = sx;
-		for(uint32_t x = 0; x < blockHeight;++x) {
-			if(sy + y >= src->height) cy = src->height-1;
+		if(sy + y >= src->height) cy = src->height-1;
+
+		for(uint32_t x = 0; x < blockWidth;++x) {
 			if(sx + x >= src->width) cx = src->width-1;
 
 			size_t const index = Image_CalculateIndex(src, cx, cy, 0, sw);
 			Image_PixelD pixel;
 			Image_GetPixelAt(src, &pixel, index);
-			dst[(((y*4) + x) * 4) + 0] = (float) pixel.r;
-			dst[(((y*4) + x) * 4) + 1] = (float) pixel.g;
-			dst[(((y*4) + x) * 4) + 2] = (float) pixel.b;
-			dst[(((y*4) + x) * 4) + 3] = (float) pixel.a;
+			size_t const dstIndex = ((y*blockWidth) + x) * 4;
+
+			dst[dstIndex + 0] = pixel.r;
+			dst[dstIndex + 1] = pixel.g;
+			dst[dstIndex + 2] = pixel.b;
+			if(forceAlphaTo1) {
+				dst[dstIndex + 3] = 1.0;
+			} else {
+				dst[dstIndex + 3] = pixel.a;
+			}
 			cx++;
 		}
 		cy++;
@@ -47,19 +73,27 @@ void WriteNxNBlock(Image_ImageHeader const *dst,
 	memcpy(dstPtr, blockData, blockByteCount);
 }
 
-void CalculateColourWeightings(float block[4 * 4 * 4], float weights[3]) {
+void CalculateColourWeightings(float block[4 * 4 * 4], float weights[3], bool adaptive) {
 	static const float baseWeights[3] = {
 			0.3086f,
 			0.6094f,
 			0.0820f
 	};
+
+	if(!adaptive) {
+		weights[0] = baseWeights[0];
+		weights[1] = baseWeights[1];
+		weights[2] = baseWeights[2];
+		return;
+	}
+
 	float medianR = 0.0f, medianG = 0.0f, medianB = 0.0f;
 
 	for (size_t k = 0; k < (4 * 4); k++) {
-		block++;
-		medianB += *block++;
-		medianG += *block++;
 		medianR += *block++;
+		medianG += *block++;
+		medianB += *block++;
+		block++;
 	}
 
 	medianR /= (4 * 4);

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef GFX_IMAGECOMPRESS_SRC_AMD_BCX_COMPRESSOR_HPP_
-#define GFX_IMAGECOMPRESS_SRC_AMD_BCX_COMPRESSOR_HPP_
+#ifndef GFX_IMAGECOMPRESS_SRC_AMD_BCX_BODY_HPP_
+#define GFX_IMAGECOMPRESS_SRC_AMD_BCX_BODY_HPP_
 
 #define MAX_BLOCK 64
 #define MAX_POINTS 16
@@ -14,5 +14,8 @@ float CompRGBBlock(float* block_32, uint16_t dwBlockSize,
 									 bool b3DRefinement, uint8_t nRefinementSteps, float* _pfChannelWeights,
 									 bool _bUseAlpha, float _fAlphaThreshold);
 
+float CompBlock1X(float* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint8_t* pcIndices,
+									uint8_t dwNumPoints, bool bFixedRampPoints, int _intPrec, int _fracPrec, bool _bFixedRamp);
 
-#endif // end GFX_IMAGECOMPRESS_SRC_AMD_BCX_COMPRESSOR_HPP_
+
+#endif // end GFX_IMAGECOMPRESS_SRC_AMD_BCX_BODY_HPP_

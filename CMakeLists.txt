@@ -18,9 +18,32 @@ set(Interface
 
 set(Src
 		imagecompress.cpp
-		amd_bcx_compressor.cpp
-		amd_bcx_compressor.hpp
-		amd_bc1_normalspeed.cpp
+
+		amd_bc1_compressor.cpp
+		amd_bc2_compressor.cpp
+		amd_bc3_compressor.cpp
+		amd_bc4_compressor.cpp
+		amd_bc5_compressor.cpp
+		amd_bc6h_compressor.cpp
+		amd_bc7_compressor.cpp
+
+		amd_bcx_helpers.cpp
+		amd_bcx_helpers.hpp
+		amd_bcx_body.cpp
+		amd_bcx_body.hpp
+		amd_bc6h_body.cpp
+		amd_bc6h_body.hpp
+		amd_bc7_body.cpp
+		amd_bc7_body.hpp
+		amd_hdr_encode.cpp
+		amd_hdr_encode.hpp
+		amd_bc7_partitions.cpp
+		amd_bc7_partitions.hpp
+		amd_bc7_3dquant_vpc.cpp
+		amd_bc7_3dquant_vpc.hpp
+		amd_shake.cpp
+		amd_shake.hpp
+
 		block_utils.hpp
 		block_utils.cpp
 		)

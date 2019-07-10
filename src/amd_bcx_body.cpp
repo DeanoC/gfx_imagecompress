@@ -31,7 +31,7 @@
 #include "al2o3_platform/platform.h"
 #include "al2o3_cmath/scalar.h"
 #include <float.h>
-#include "amd_bcx_compressor.hpp"
+#include "amd_bcx_body.hpp"
 
 #define ALIGN_16(x) AL2O3_DEFINE_ALIGNED(x, 16)
 
@@ -1900,7 +1900,7 @@ void CompBlock1X(float* _Blk, [IN] scalar data block (alphas or normals) in floa
 ---------------------------------------------------------------------------------------------*/
 
 float CompBlock1X(float* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint8_t* pcIndices,
-											 uint8_t dwNumPoints, bool bFixedRampPoints, bool _bUseSSE2, int _intPrec, int _fracPrec, bool _bFixedRamp)
+											 uint8_t dwNumPoints, bool bFixedRampPoints, int _intPrec, int _fracPrec, bool _bFixedRamp)
 {
 	// just to make them initialized
 	if(!_bFixedRamp)
@@ -1911,7 +1911,7 @@ float CompBlock1X(float* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint
 
 	// this one makes the bulk of the work
 	float Ramp[NUM_ENDPOINTS];
-	CompBlock1(Ramp, _Blk, dwBlockSize, dwNumPoints, bFixedRampPoints, _intPrec, _fracPrec, _bFixedRamp, _bUseSSE2);
+	CompBlock1(Ramp, _Blk, dwBlockSize, dwNumPoints, bFixedRampPoints, _intPrec, _fracPrec, _bFixedRamp);
 
 	// final clusterization applied
 	float fError = Clstr1(pcIndices, _Blk, Ramp, dwBlockSize, dwNumPoints, bFixedRampPoints, _intPrec, _fracPrec, _bFixedRamp);
@@ -1919,28 +1919,4 @@ float CompBlock1X(float* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint
 	nEndpoints[1] = (uint8_t)Ramp[1];
 
 	return fError;
-}
-
-/*--------------------------------------------------------------------------------------------
-// input [0,255]
-void CompBlock1X(uint8_t* _Blk, [IN] scalar data block (alphas or normals) in 8 bits format 
-                 CMP_uint32_t blockCompressed[NUM_ENDPOINTS],  [OUT] compressed data in DXT5 alpha foramt
-                 int _NbrClrs,              [IN] actual number of elements in the block
-                 int _intPrec,              [IN} integer precision; it applies both to the input data and
-                                                 to the ramp points
-                 int _fracPrec,             [IN] fractional precision of the ramp points
-                 bool _bFixedRamp,          [IN] always true at this point
-                 bool _bUseSSE2             [IN] forces to switch to the SSE2-based assembler implementation
-               )
----------------------------------------------------------------------------------------------*/
-
-float CompBlock1X(uint8_t* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint8_t* pcIndices,
-											 uint8_t dwNumPoints, bool bFixedRampPoints, bool _bUseSSE2, int _intPrec, int _fracPrec, bool _bFixedRamp)
-{
-	// convert the input and call the float equivalent.
-	float fBlk[MAX_BLOCK];
-	for(int i = 0; i < dwBlockSize; i++)
-		fBlk[i] = (float)_Blk[i] / 255.f;
-
-	return CompBlock1X(fBlk, dwBlockSize, nEndpoints, pcIndices, dwNumPoints, bFixedRampPoints, _bUseSSE2, _intPrec, _fracPrec, _bFixedRamp);
 }
