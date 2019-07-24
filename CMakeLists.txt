@@ -52,7 +52,7 @@ set(Deps
 		al2o3_platform
 		al2o3_cmath
 		al2o3_stb
-		gfx_imageformat
+		tiny_imageformat
 		gfx_image_interface
 		utils_misccpp
 		)

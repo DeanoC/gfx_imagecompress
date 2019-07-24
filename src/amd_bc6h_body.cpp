@@ -771,8 +771,8 @@ float CalcOneRegionEndPtsError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_
 		{
 			for (int n = 0; n < NCHANNELS; n++)
 			{
-				float calencpts = fEndPoints[0][m][n] + (abs(fEndPoints[0][m][n] - fEndPoints[0][m][n]) * (shape_indices[0][i] / 15));
-				error += abs(BC6H_data.din[i][n] - calencpts);
+				float calencpts = fEndPoints[0][m][n] + (fabs(fEndPoints[0][m][n] - fEndPoints[0][m][n]) * (shape_indices[0][i] / 15));
+				error += fabs(BC6H_data.din[i][n] - calencpts);
 			}
 		}
 	}
@@ -811,16 +811,16 @@ float CalcShapeError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_SUBSETS][M
 		}
 
 		// initialize bestError to the difference for first data
-		bestError = abs(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][0].x) +
-				abs(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][0].y) +
-				abs(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][0].z);
+		bestError = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][0].x) +
+				fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][0].y) +
+				fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][0].z);
 
 		// loop through the rest of the data until find the best error
 		for (int j = 1; j < maxPallet && bestError > 0; j++)
 		{
-			error = abs(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][j].x) +
-					abs(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][j].y) +
-					abs(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][j].z);
+			error = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][j].x) +
+					fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][j].y) +
+					fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][j].z);
 
 			if (error <= bestError)
 				bestError = error;
@@ -860,9 +860,9 @@ void ReIndexShapef(AMD_BC6H_Format &BC6H_data, int shape_indices[BC6H_MAX_SUBSET
 			for (int j = 0; j < MaxPallet; j++)
 			{
 				// Calculate error from original
-				error = abs(BC6H_data.din[i][0] - BC6H_data.Paletef[1][j].x) +
-						abs(BC6H_data.din[i][1] - BC6H_data.Paletef[1][j].y) +
-						abs(BC6H_data.din[i][2] - BC6H_data.Paletef[1][j].z);
+				error = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[1][j].x) +
+						fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[1][j].y) +
+						fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[1][j].z);
 				if (error < bestError)
 				{
 					bestError = error;
@@ -882,9 +882,9 @@ void ReIndexShapef(AMD_BC6H_Format &BC6H_data, int shape_indices[BC6H_MAX_SUBSET
 			for (int j = 0; j < MaxPallet; j++)
 			{
 				// Calculate error from original
-				error = abs(BC6H_data.din[i][0] - BC6H_data.Paletef[0][j].x) +
-						abs(BC6H_data.din[i][1] - BC6H_data.Paletef[0][j].y) +
-						abs(BC6H_data.din[i][2] - BC6H_data.Paletef[0][j].z);
+				error = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[0][j].x) +
+						fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[0][j].y) +
+						fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[0][j].z);
 				if (error < bestError)
 				{
 					bestError = error;
@@ -1281,9 +1281,9 @@ void BC6HBlockEncoder::AverageEndPoint(float EndPoints[MAX_SUBSETS][MAX_END_POIN
 				EndPoints[subset][0][2]) / 3.0f;
 
 		// determine average diff
-		diff = (abs(EndPoints[subset][0][0] - avr) +
-				abs(EndPoints[subset][0][1] - avr) +
-				abs(EndPoints[subset][0][2] - avr)) / 3;
+		diff = (fabs(EndPoints[subset][0][0] - avr) +
+				fabs(EndPoints[subset][0][1] - avr) +
+				fabs(EndPoints[subset][0][2] - avr)) / 3;
 
 		if ((diff < m_DiffLevel) && (avr > m_DiffLevel))
 		{
@@ -1302,9 +1302,9 @@ void BC6HBlockEncoder::AverageEndPoint(float EndPoints[MAX_SUBSETS][MAX_END_POIN
 				EndPoints[subset][1][1] +
 				EndPoints[subset][1][2]) / 3.0f;
 
-		diff = (abs(EndPoints[subset][1][0] - avr) +
-				abs(EndPoints[subset][1][1] - avr) +
-				abs(EndPoints[subset][1][2] - avr)) / 3;
+		diff = (fabs(EndPoints[subset][1][0] - avr) +
+				fabs(EndPoints[subset][1][1] - avr) +
+				fabs(EndPoints[subset][1][2] - avr)) / 3;
 
 		if ((diff < m_DiffLevel) && (avr > m_DiffLevel))
 		{
@@ -1540,7 +1540,7 @@ float BC6HBlockEncoder::CompressBlock(float in[MAX_SUBSET_SIZE][MAX_DIMENSION_BI
 		if (in[i][0] < 0.00001)
 		{
 			if (m_isSigned)
-				BC6H_data.din[i][0] = -Math_Float2Half(abs(in[i][0] / normalization));
+				BC6H_data.din[i][0] = -Math_Float2Half(fabs(in[i][0] / normalization));
 			else
 				BC6H_data.din[i][0] = 0.0;
 		}
@@ -1550,7 +1550,7 @@ float BC6HBlockEncoder::CompressBlock(float in[MAX_SUBSET_SIZE][MAX_DIMENSION_BI
 		if (in[i][1] < 0.00001)
 		{
 			if (m_isSigned)
-				BC6H_data.din[i][1] = -Math_Float2Half(abs(in[i][1] / normalization));
+				BC6H_data.din[i][1] = -Math_Float2Half(fabs(in[i][1] / normalization));
 			else
 				BC6H_data.din[i][1] = 0.0;
 		}
@@ -1560,7 +1560,7 @@ float BC6HBlockEncoder::CompressBlock(float in[MAX_SUBSET_SIZE][MAX_DIMENSION_BI
 		if (in[i][2] < 0.00001)
 		{
 			if (m_isSigned)
-				BC6H_data.din[i][2] = -Math_Float2Half(abs(in[i][2] / normalization));
+				BC6H_data.din[i][2] = -Math_Float2Half(fabs(in[i][2] / normalization));
 			else
 				BC6H_data.din[i][2] = 0.0;
 		}

@@ -561,7 +561,7 @@ static void FindAxis(float _outBlk[MAX_BLOCK][NUM_CHANNELS], float fLineDirectio
 		for(j = 0; j < nDimensions; j++)
 		{
 			float Det = RGB2[j] * RGB2[(j+1)%3] - Crrl[j] * Crrl[j];
-			Cs[j] = abs(Crrl[j]/sqrt(RGB2[j] * RGB2[(j+1)%3]));
+			Cs[j] = fabs(Crrl[j]/sqrt(RGB2[j] * RGB2[(j+1)%3]));
 			if(maxDet < Det)
 			{
 				maxDet = Det;
