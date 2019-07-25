@@ -16,10 +16,10 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC2(Image_ImageHeader c
 
 	amdOptions = (amdOptions == nullptr)? Image_CompressDefaultAmdOptions() : amdOptions;
 
-	bool const sRGB = ImageFormat_IsSRGB((src->format));
-	bool const srcHasAlpha = ImageFormat_ChannelCount(src->format) > 3;
+	bool const sRGB = TinyImageFormat_IsSRGB((src->format));
+	bool const srcHasAlpha = TinyImageFormat_ChannelCount(src->format) > 3;
 
-	ImageFormat dstFmt = sRGB ? ImageFormat_BC2_SRGB_BLOCK : ImageFormat_BC2_UNORM_BLOCK;
+	TinyImageFormat dstFmt = sRGB ? TinyImageFormat_BC2_SRGB_BLOCK : TinyImageFormat_BC2_UNORM_BLOCK;
 	Image_ImageHeader const *dst = Image_CreateNoClear(src->width, src->height, 1, src->slices, dstFmt);
 	if (!dst) return nullptr;
 
@@ -27,9 +27,9 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC2(Image_ImageHeader c
 	size_t const blocksX = (src->width + 3) / 4;
 	size_t const blocksY = (src->height + 3) / 4;
 
-	for (size_t w = 0; w < src->slices; ++w) {
-		for (size_t y = 0; y < blocksY; ++y) {
-			for (size_t x = 0; x < blocksX; ++x) {
+	for (uint32_t w = 0; w < src->slices; ++w) {
+		for (uint32_t y = 0; y < blocksY; ++y) {
+			for (uint32_t x = 0; x < blocksX; ++x) {
 				uint32_t compressedBlock[4];
 
 				float srcBlock[4 * 4 * 4];

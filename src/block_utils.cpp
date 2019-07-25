@@ -65,7 +65,7 @@ void WriteNxNBlock(Image_ImageHeader const *dst,
 									 uint32_t x,
 									 uint32_t y,
 									 uint32_t w) {
-	ASSERT(blockByteCount == (ImageFormat_BitSizeOfBlock(dst->format)/8));
+	ASSERT(blockByteCount == (TinyImageFormat_BitSizeOfBlock(dst->format)/8));
 	uint8_t * rawData = (uint8_t *) Image_RawDataPtr(dst);
 
 	size_t const blockIndex = Image_GetBlockIndex(dst, x, y, 0, w);

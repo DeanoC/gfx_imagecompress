@@ -126,7 +126,7 @@ static void GenerateTestPatternFloatRGBA(Image_ImageHeader const* image) {
 }
 
 TEST_CASE("AMD BC1 Direct RGB", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_256x256.dds")
@@ -138,13 +138,13 @@ TEST_CASE("AMD BC1 Direct RGB", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC1_RGB_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC1_RGB_UNORM_BLOCK);
 	Image_Destroy(image);
 	Image_Destroy(dst);
 }
 
 TEST_CASE("AMD BC1 Direct RGB npot", "[ImageCompress]") {
-	auto image = Image_Create2D(257, 257, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(257, 257, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_257x257.dds")
@@ -156,7 +156,7 @@ TEST_CASE("AMD BC1 Direct RGB npot", "[ImageCompress]") {
 	REQUIRE(dst->height == 260);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC1_RGB_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC1_RGB_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC1_RGB_UNORM_260x260.dds")
 
@@ -181,7 +181,7 @@ TEST_CASE("AMD BC1 Direct RGB Alpha options src no alpha", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC1_RGBA_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC1_RGBA_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC1_RGBA_UNORM_256x256.dds")
 
@@ -190,7 +190,7 @@ TEST_CASE("AMD BC1 Direct RGB Alpha options src no alpha", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC1 Direct RGB Alpha options src with alpha", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8A8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8A8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB_Punchthrough(image);
 	SAVE_DDS(image, "compress_ref_punchthrough_R8G8B8A8_UNORM_256x256.dds")
@@ -207,7 +207,7 @@ TEST_CASE("AMD BC1 Direct RGB Alpha options src with alpha", "[ImageCompress]") 
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC1_RGBA_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC1_RGBA_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_punchthrough_BC1_RGBA_UNORM_256x256.dds")
 
@@ -215,7 +215,7 @@ TEST_CASE("AMD BC1 Direct RGB Alpha options src with alpha", "[ImageCompress]") 
 	Image_Destroy(dst);
 }
 TEST_CASE("AMD BC2 Direct RGBA", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8A8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8A8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGBA(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8A8_UNORM_256x256.dds")
@@ -228,7 +228,7 @@ TEST_CASE("AMD BC2 Direct RGBA", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC2_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC2_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC2_UNORM_256x256.dds")
 
@@ -237,7 +237,7 @@ TEST_CASE("AMD BC2 Direct RGBA", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC3 Direct RGBA", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8A8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8A8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGBA(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8A8_UNORM_256x256.dds")
@@ -249,7 +249,7 @@ TEST_CASE("AMD BC3 Direct RGBA", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC3_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC3_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC3_UNORM_256x256.dds")
 
@@ -258,7 +258,7 @@ TEST_CASE("AMD BC3 Direct RGBA", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC4 Direct R", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8A8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8A8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGBA(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8A8_UNORM_256x256.dds")
@@ -270,7 +270,7 @@ TEST_CASE("AMD BC4 Direct R", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC4_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC4_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC4_UNORM_256x256.dds")
 
@@ -278,7 +278,7 @@ TEST_CASE("AMD BC4 Direct R", "[ImageCompress]") {
 	Image_Destroy(dst);
 }
 TEST_CASE("AMD BC5 Direct RG", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8A8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8A8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGBA(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8A8_UNORM_256x256.dds")
@@ -290,7 +290,7 @@ TEST_CASE("AMD BC5 Direct RG", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC5_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC5_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC5_UNORM_256x256.dds")
 
@@ -299,7 +299,7 @@ TEST_CASE("AMD BC5 Direct RG", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
-	auto image = Image_Create2D(32, 32, ImageFormat_R32G32B32A32_SFLOAT);
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R32G32B32A32_SFLOAT);
 	REQUIRE(image);
 	GenerateTestPatternFloatRGBA(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8A8_SFLOAT_32x32.dds")
@@ -311,7 +311,7 @@ TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC6H_SFLOAT_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC6H_SFLOAT_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC6H_SFLOAT_32x32.dds")
 
@@ -320,7 +320,7 @@ TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct R", "[ImageCompress]") {
-	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternR(image);
 	SAVE_DDS(image, "compress_ref_R_R8G8B8_UNORM_32x32.dds")
@@ -332,7 +332,7 @@ TEST_CASE("AMD BC7 Direct R", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_R_BC7_UNORM_32x32.dds")
 
@@ -341,7 +341,7 @@ TEST_CASE("AMD BC7 Direct R", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct G", "[ImageCompress]") {
-	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternG(image);
 	SAVE_DDS(image, "compress_ref_G_R8G8B8_UNORM_32x32.dds")
@@ -353,7 +353,7 @@ TEST_CASE("AMD BC7 Direct G", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_G_BC7_UNORM_32x32.dds")
 
@@ -362,7 +362,7 @@ TEST_CASE("AMD BC7 Direct G", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct B", "[ImageCompress]") {
-	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternB(image);
 	SAVE_DDS(image, "compress_ref_B_R8G8B8_UNORM_32x32.dds")
@@ -374,7 +374,7 @@ TEST_CASE("AMD BC7 Direct B", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_B_BC7_UNORM_32x32.dds")
 
@@ -383,7 +383,7 @@ TEST_CASE("AMD BC7 Direct B", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
-	auto image = Image_Create2D(32, 32, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_32x32.dds")
@@ -395,7 +395,7 @@ TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC7_UNORM_32x32.dds")
 
@@ -407,7 +407,7 @@ TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
 // versions
 #ifdef NDEBUG
 TEST_CASE("AMD BC6H Direct RGBA 256", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R32G32B32A32_SFLOAT);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R32G32B32A32_SFLOAT);
 	REQUIRE(image);
 	GenerateTestPatternFloatRGBA(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8A8_SFLOAT_256x32.dds")
@@ -419,7 +419,7 @@ TEST_CASE("AMD BC6H Direct RGBA 256", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC6H_SFLOAT_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC6H_SFLOAT_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC6H_SFLOAT_256x256.dds")
 
@@ -428,7 +428,7 @@ TEST_CASE("AMD BC6H Direct RGBA 256", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct RGB 256", "[ImageCompress]") {
-	auto image = Image_Create2D(256, 256, ImageFormat_R8G8B8_UNORM);
+	auto image = Image_Create2D(256, 256, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB(image);
 	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_256x256.dds")
@@ -440,7 +440,7 @@ TEST_CASE("AMD BC7 Direct RGB 256", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == ImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
 
 	SAVE_DDS(dst, "compress_BC7_UNORM_256x256.dds")
 
