@@ -1214,7 +1214,7 @@ void eigenVector_d(float cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], float vector
 		for (j = 0; j<dimension; j++)
 			c[0][i][j] = cov[i][j];
 
-	p = (int)floorf(log((FLT_MAX_EXP - EV_SLACK) / ceilf(logf((float)dimension) / logf(2.0f))) / logf(2.0f));
+	p = (int)floorf(logf((FLT_MAX_EXP - EV_SLACK) / ceilf(logf((float)dimension) / logf(2.0f))) / logf(2.0f));
 
 	//assert(p>0);
 
@@ -2086,11 +2086,11 @@ float quant_single_point_d
 #ifndef USE_NEWRAMP
 			out[i][j] = ramp[p1][p2][p3][p4][p5];
 #else
-			out[i][j] = (int)rampf(p1, p3, p4, p5);
+			out[i][j] = rampf(p1, (float)p3, (float)p4, p5);
 #endif
 		}
 	}
-	return err_1 * numEntries;
+	return err_1 * (float)numEntries;
 }
 
 #define SP_ERRIDX_MAX 256

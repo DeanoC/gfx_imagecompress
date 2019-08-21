@@ -587,14 +587,11 @@ void BC6HBlockEncoder::SwapIndices(int iEndPoints[MAX_SUBSETS][MAX_END_POINTS][M
 // helper function to check transform overflow
 bool isOverflow(int endpoint, int nbit)
 {
-	int maxRange = pow(2, nbit - 1) - 1;
-	int minRange = -(pow(2, nbit - 1));
+	int maxRange = (1 << (nbit - 1)) - 1;
+	int minRange = -(1 << (nbit - 1));
 
 	//no overflow
-	if ((endpoint >= minRange) && (endpoint <= maxRange))
-		return false;
-	else //overflow
-		return true;
+	return !((endpoint >= minRange) && (endpoint <= maxRange));
 }
 
 // Bug in this code : Need to add signed bit to values
@@ -707,7 +704,8 @@ void BC6HBlockEncoder::SaveCompressedBlockData( AMD_BC6H_Format &BC6H_data,
 }
 
 
-void palitizeEndPointsF(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG])
+void palitizeEndPointsF(AMD_BC6H_Format &BC6H_data,
+		float const fEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG])
 {
 	// scale endpoints
 	float  Ar,Ag,Ab, Br,Bg,Bb;
@@ -759,7 +757,9 @@ void palitizeEndPointsF(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_SUBSETS
 	}
 }
 
-float CalcOneRegionEndPtsError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG], int shape_indices[MAX_SUBSETS][MAX_SUBSET_SIZE])
+float CalcOneRegionEndPtsError(AMD_BC6H_Format const &BC6H_data,
+		float const fEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG],
+		int const shape_indices[MAX_SUBSETS][MAX_SUBSET_SIZE])
 {
 	float error = 0;
 
@@ -771,8 +771,8 @@ float CalcOneRegionEndPtsError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_
 		{
 			for (int n = 0; n < NCHANNELS; n++)
 			{
-				float calencpts = fEndPoints[0][m][n] + (fabs(fEndPoints[0][m][n] - fEndPoints[0][m][n]) * (shape_indices[0][i] / 15));
-				error += fabs(BC6H_data.din[i][n] - calencpts);
+				float calencpts = fEndPoints[0][m][n] + (Math_AbsF(fEndPoints[0][m][n] - fEndPoints[0][m][n]) * ((float)shape_indices[0][i] / 15.0f));
+				error += Math_AbsF(BC6H_data.din[i][n] - calencpts);
 			}
 		}
 	}
@@ -780,7 +780,9 @@ float CalcOneRegionEndPtsError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_
 	return error;
 }
 
-float CalcShapeError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG], bool SkipPallet)
+float CalcShapeError(AMD_BC6H_Format &BC6H_data,
+		float const fEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG],
+		bool const SkipPallet)
 {
 	int maxPallet;
 	int subset = 0;
@@ -811,16 +813,16 @@ float CalcShapeError(AMD_BC6H_Format &BC6H_data, float fEndPoints[MAX_SUBSETS][M
 		}
 
 		// initialize bestError to the difference for first data
-		bestError = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][0].x) +
-				fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][0].y) +
-				fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][0].z);
+		bestError = Math_AbsF(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][0].x) +
+				Math_AbsF(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][0].y) +
+				Math_AbsF(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][0].z);
 
 		// loop through the rest of the data until find the best error
 		for (int j = 1; j < maxPallet && bestError > 0; j++)
 		{
-			error = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][j].x) +
-					fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][j].y) +
-					fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][j].z);
+			error = Math_AbsF(BC6H_data.din[i][0] - BC6H_data.Paletef[subset][j].x) +
+					Math_AbsF(BC6H_data.din[i][1] - BC6H_data.Paletef[subset][j].y) +
+					Math_AbsF(BC6H_data.din[i][2] - BC6H_data.Paletef[subset][j].z);
 
 			if (error <= bestError)
 				bestError = error;
@@ -860,9 +862,9 @@ void ReIndexShapef(AMD_BC6H_Format &BC6H_data, int shape_indices[BC6H_MAX_SUBSET
 			for (int j = 0; j < MaxPallet; j++)
 			{
 				// Calculate error from original
-				error = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[1][j].x) +
-						fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[1][j].y) +
-						fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[1][j].z);
+				error = Math_AbsF(BC6H_data.din[i][0] - BC6H_data.Paletef[1][j].x) +
+						Math_AbsF(BC6H_data.din[i][1] - BC6H_data.Paletef[1][j].y) +
+						Math_AbsF(BC6H_data.din[i][2] - BC6H_data.Paletef[1][j].z);
 				if (error < bestError)
 				{
 					bestError = error;
@@ -882,9 +884,9 @@ void ReIndexShapef(AMD_BC6H_Format &BC6H_data, int shape_indices[BC6H_MAX_SUBSET
 			for (int j = 0; j < MaxPallet; j++)
 			{
 				// Calculate error from original
-				error = fabs(BC6H_data.din[i][0] - BC6H_data.Paletef[0][j].x) +
-						fabs(BC6H_data.din[i][1] - BC6H_data.Paletef[0][j].y) +
-						fabs(BC6H_data.din[i][2] - BC6H_data.Paletef[0][j].z);
+				error = Math_AbsF(BC6H_data.din[i][0] - BC6H_data.Paletef[0][j].x) +
+						Math_AbsF(BC6H_data.din[i][1] - BC6H_data.Paletef[0][j].y) +
+						Math_AbsF(BC6H_data.din[i][2] - BC6H_data.Paletef[0][j].z);
 				if (error < bestError)
 				{
 					bestError = error;
@@ -960,12 +962,9 @@ float    BC6HBlockEncoder::FindBestPattern(AMD_BC6H_Format &BC6H_data,
 	if ((max_subsets > 1) && (m_quality > 0.80))
 	{
 		int     tempIndices[MAX_SUBSET_SIZE];
-		int     temp_epo_code[2][2][MAX_DIMENSION_BIG];
 		int     bits[3] = { 8,8,8 };     // Channel index bit size
 
-		float   epo[2][MAX_DIMENSION_BIG];
 		int     epo_code[MAX_SUBSETS][2][MAX_DIMENSION_BIG];
-		int     shakeSize = 8;
 
 		error[1] = 0.0;
 		for (int subset = 0; subset < max_subsets; subset++)
@@ -986,6 +985,8 @@ float    BC6HBlockEncoder::FindBestPattern(AMD_BC6H_Format &BC6H_data,
 					3
 			);
 
+			//float   epo[2][MAX_DIMENSION_BIG];
+			//int     shakeSize = 8;
 			// error[1] += ep_shaker_2_d(
 			//      BC6H_data.partition[subset],
 			//      BC6H_data.entryCount[subset],
@@ -1015,8 +1016,8 @@ float    BC6HBlockEncoder::FindBestPattern(AMD_BC6H_Format &BC6H_data,
 			{
 				for (int k = 0; k < MAX_DIMENSION_BIG; k++)
 				{
-					BC6H_data.fEndPoints[subset][0][k] = epo_code[subset][0][k];
-					BC6H_data.fEndPoints[subset][1][k] = epo_code[subset][1][k];
+					BC6H_data.fEndPoints[subset][0][k] = (float)epo_code[subset][0][k];
+					BC6H_data.fEndPoints[subset][1][k] = (float)epo_code[subset][1][k];
 				}
 			}
 		}
@@ -1070,8 +1071,8 @@ void decompress_endpoints1(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[0][1][i] = Unquantize(out[0][1][i], ModePartition[mode].nbits, false);
 
 				// F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], false);
 			}
 		}
 		else
@@ -1086,8 +1087,8 @@ void decompress_endpoints1(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[0][1][i] = Unquantize(out[0][1][i], ModePartition[mode].nbits, false);
 
 				// F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i],false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i],false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i],false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i],false);
 			}
 		}
 
@@ -1107,8 +1108,8 @@ void decompress_endpoints1(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[0][1][i] = Unquantize(out[0][1][i], ModePartition[mode].nbits, false);
 
 				// F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], false);
 			}
 		}
 		else
@@ -1123,8 +1124,8 @@ void decompress_endpoints1(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[0][1][i] = Unquantize(out[0][1][i], ModePartition[mode].nbits, false);
 
 				// F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], false);
 			}
 		}
 	}
@@ -1164,10 +1165,10 @@ void decompress_endpoints2(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[1][1][i] = Unquantize(out[1][1][i], ModePartition[mode].nbits, true);
 
 				// F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], true);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], true);
-				outf[1][0][i] = finish_unquantizeF16(out[1][0][i], true);
-				outf[1][1][i] = finish_unquantizeF16(out[1][1][i], true);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], true);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], true);
+				outf[1][0][i] = (float)finish_unquantizeF16(out[1][0][i], true);
+				outf[1][1][i] = (float)finish_unquantizeF16(out[1][1][i], true);
 
 			}
 		}
@@ -1187,10 +1188,10 @@ void decompress_endpoints2(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[1][1][i] = Unquantize(out[1][1][i], ModePartition[mode].nbits, false);
 
 				// nbits to F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], false);
-				outf[1][0][i] = finish_unquantizeF16(out[1][0][i], false);
-				outf[1][1][i] = finish_unquantizeF16(out[1][1][i], false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], false);
+				outf[1][0][i] = (float)finish_unquantizeF16(out[1][0][i], false);
+				outf[1][1][i] = (float)finish_unquantizeF16(out[1][1][i], false);
 			}
 		}
 
@@ -1218,10 +1219,10 @@ void decompress_endpoints2(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[1][1][i] = Unquantize(out[1][1][i], ModePartition[mode].nbits, false);
 
 				// nbits to F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], false);
-				outf[1][0][i] = finish_unquantizeF16(out[1][0][i], false);
-				outf[1][1][i] = finish_unquantizeF16(out[1][1][i], false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], false);
+				outf[1][0][i] = (float)finish_unquantizeF16(out[1][0][i], false);
+				outf[1][1][i] = (float)finish_unquantizeF16(out[1][1][i], false);
 
 			}
 		}
@@ -1241,10 +1242,10 @@ void decompress_endpoints2(AMD_BC6H_Format& bc6h_format, int oEndPoints[MAX_SUBS
 				out[1][1][i] = Unquantize(out[1][1][i], ModePartition[mode].nbits, false);
 
 				// nbits to F16 format
-				outf[0][0][i] = finish_unquantizeF16(out[0][0][i], false);
-				outf[0][1][i] = finish_unquantizeF16(out[0][1][i], false);
-				outf[1][0][i] = finish_unquantizeF16(out[1][0][i], false);
-				outf[1][1][i] = finish_unquantizeF16(out[1][1][i], false);
+				outf[0][0][i] = (float)finish_unquantizeF16(out[0][0][i], false);
+				outf[0][1][i] = (float)finish_unquantizeF16(out[0][1][i], false);
+				outf[1][0][i] = (float)finish_unquantizeF16(out[1][0][i], false);
+				outf[1][1][i] = (float)finish_unquantizeF16(out[1][1][i], false);
 			}
 		}
 	}
@@ -1272,7 +1273,7 @@ void BC6HBlockEncoder::AverageEndPoint(float EndPoints[MAX_SUBSETS][MAX_END_POIN
 	float avr;
 
 	// determin differance level based on lowest precision of the mode
-	m_DiffLevel = ModePartition[mode].lowestPrec;
+	m_DiffLevel = (float)ModePartition[mode].lowestPrec;
 
 	for (int subset = 0; subset < max_subsets; ++subset)
 	{
@@ -1281,9 +1282,9 @@ void BC6HBlockEncoder::AverageEndPoint(float EndPoints[MAX_SUBSETS][MAX_END_POIN
 				EndPoints[subset][0][2]) / 3.0f;
 
 		// determine average diff
-		diff = (fabs(EndPoints[subset][0][0] - avr) +
-				fabs(EndPoints[subset][0][1] - avr) +
-				fabs(EndPoints[subset][0][2] - avr)) / 3;
+		diff = (Math_AbsF(EndPoints[subset][0][0] - avr) +
+				Math_AbsF(EndPoints[subset][0][1] - avr) +
+				Math_AbsF(EndPoints[subset][0][2] - avr)) / 3;
 
 		if ((diff < m_DiffLevel) && (avr > m_DiffLevel))
 		{
@@ -1302,9 +1303,9 @@ void BC6HBlockEncoder::AverageEndPoint(float EndPoints[MAX_SUBSETS][MAX_END_POIN
 				EndPoints[subset][1][1] +
 				EndPoints[subset][1][2]) / 3.0f;
 
-		diff = (fabs(EndPoints[subset][1][0] - avr) +
-				fabs(EndPoints[subset][1][1] - avr) +
-				fabs(EndPoints[subset][1][2] - avr)) / 3;
+		diff = (Math_AbsF(EndPoints[subset][1][0] - avr) +
+				Math_AbsF(EndPoints[subset][1][1] - avr) +
+				Math_AbsF(EndPoints[subset][1][2] - avr)) / 3;
 
 		if ((diff < m_DiffLevel) && (avr > m_DiffLevel))
 		{
@@ -1355,7 +1356,7 @@ float    BC6HBlockEncoder::EncodePattern(AMD_BC6H_Format &BC6H_data, float  erro
 	// and a set of colors on the line equally spaced (indexedcolors)
 	// Lets assign indices
 
-	float SrcEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG];                  // temp endpoints used during calculations
+//	float SrcEndPoints[MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG];                  // temp endpoints used during calculations
 
 	// Quantize the EndPoints
 	int F16EndPoints[MAX_BC6H_MODES + 1][MAX_SUBSETS][MAX_END_POINTS][MAX_DIMENSION_BIG];                    // temp endpoints used during calculations
@@ -1540,7 +1541,7 @@ float BC6HBlockEncoder::CompressBlock(float in[MAX_SUBSET_SIZE][MAX_DIMENSION_BI
 		if (in[i][0] < 0.00001)
 		{
 			if (m_isSigned)
-				BC6H_data.din[i][0] = -Math_Float2Half(fabs(in[i][0] / normalization));
+				BC6H_data.din[i][0] = (float)-Math_Float2Half(Math_AbsF(in[i][0] / normalization));
 			else
 				BC6H_data.din[i][0] = 0.0;
 		}
@@ -1550,7 +1551,7 @@ float BC6HBlockEncoder::CompressBlock(float in[MAX_SUBSET_SIZE][MAX_DIMENSION_BI
 		if (in[i][1] < 0.00001)
 		{
 			if (m_isSigned)
-				BC6H_data.din[i][1] = -Math_Float2Half(fabs(in[i][1] / normalization));
+				BC6H_data.din[i][1] = (float)-Math_Float2Half(Math_AbsF(in[i][1] / normalization));
 			else
 				BC6H_data.din[i][1] = 0.0;
 		}
@@ -1560,7 +1561,7 @@ float BC6HBlockEncoder::CompressBlock(float in[MAX_SUBSET_SIZE][MAX_DIMENSION_BI
 		if (in[i][2] < 0.00001)
 		{
 			if (m_isSigned)
-				BC6H_data.din[i][2] = -Math_Float2Half(fabs(in[i][2] / normalization));
+				BC6H_data.din[i][2] = (float)-Math_Float2Half(Math_AbsF(in[i][2] / normalization));
 			else
 				BC6H_data.din[i][2] = 0.0;
 		}
