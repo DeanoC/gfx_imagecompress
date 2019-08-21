@@ -19,7 +19,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC3(Image_ImageHeader c
 	bool const sRGB = TinyImageFormat_IsSRGB((src->format));
 	bool const srcHasAlpha = TinyImageFormat_ChannelCount(src->format) > 3;
 
-	TinyImageFormat dstFmt = sRGB ? TinyImageFormat_BC3_SRGB_BLOCK : TinyImageFormat_BC3_UNORM_BLOCK;
+	TinyImageFormat dstFmt = sRGB ? TinyImageFormat_DXBC3_SRGB : TinyImageFormat_DXBC3_UNORM;
 	Image_ImageHeader const *dst = Image_CreateNoClear(src->width, src->height, 1, src->slices, dstFmt);
 	if (!dst) return nullptr;
 

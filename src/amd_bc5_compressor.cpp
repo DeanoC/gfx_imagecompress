@@ -16,7 +16,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC5(Image_ImageHeader c
 	bool const srcIsSigned = TinyImageFormat_IsSigned(src->format);
 	bool const srcHasAlpha = TinyImageFormat_ChannelCount(src->format) > 3;
 
-	TinyImageFormat dstFmt = srcIsSigned ? TinyImageFormat_BC5_SNORM_BLOCK : TinyImageFormat_BC5_UNORM_BLOCK;
+	TinyImageFormat dstFmt = srcIsSigned ? TinyImageFormat_DXBC5_SNORM : TinyImageFormat_DXBC5_UNORM;
 	Image_ImageHeader const *dst = Image_CreateNoClear(src->width, src->height, 1, src->slices, dstFmt);
 	if (!dst) return nullptr;
 

@@ -40,7 +40,7 @@ void ReadNxNBlock(Image_ImageHeader const *src,
 
 			size_t const index = Image_CalculateIndex(src, cx, cy, 0, sw);
 			Image_PixelD pixel;
-			Image_GetPixelAt(src, &pixel, index);
+			Image_GetPixelAtD(src, (double*)&pixel, index);
 			size_t const dstIndex = ((y*blockWidth) + x) * 4;
 
 			dst[dstIndex + 0] = pixel.r;

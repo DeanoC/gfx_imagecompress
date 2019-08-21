@@ -19,7 +19,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC6H(Image_ImageHeader 
 	bool const srcIsSigned = TinyImageFormat_IsSigned(src->format);
 	bool const srcHasAlpha = TinyImageFormat_ChannelCount(src->format) > 3;
 
-	TinyImageFormat dstFmt = srcIsSigned ? TinyImageFormat_BC6H_SFLOAT_BLOCK : TinyImageFormat_BC6H_UFLOAT_BLOCK;
+	TinyImageFormat dstFmt = srcIsSigned ? TinyImageFormat_DXBC6H_SFLOAT : TinyImageFormat_DXBC6H_UFLOAT;
 	Image_ImageHeader const *dst = Image_CreateNoClear(src->width, src->height, 1, src->slices, dstFmt);
 	if (!dst)
 		return nullptr;

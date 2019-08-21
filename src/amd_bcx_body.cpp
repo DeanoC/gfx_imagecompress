@@ -136,16 +136,16 @@ static void MkRmpOnGrid(float _RmpF[NUM_CHANNELS][NUM_ENDPOINTS], float _MnMx[NU
 	{
 		for(int k = 0; k < 2; k++)
 		{
-			_RmpF[j][k] = floor(_MnMx[j][k]);
+			_RmpF[j][k] = floorf(_MnMx[j][k]);
 			if(_RmpF[j][k] <= _Min)
 				_RmpF[j][k] = _Min;
 			else
 			{
-				_RmpF[j][k] += floor(128.f / Fctrs1[j]) - floor(_RmpF[j][k] / Fctrs1[j]);
+				_RmpF[j][k] += floorf(128.f / Fctrs1[j]) - floorf(_RmpF[j][k] / Fctrs1[j]);
 				_RmpF[j][k] = Math_MinF(_RmpF[j][k], _Max);
 			}
 
-			_RmpF[j][k] = floor(_RmpF[j][k] / Fctrs0[j]) * Fctrs0[j];
+			_RmpF[j][k] = floorf(_RmpF[j][k] / Fctrs0[j]) * Fctrs0[j];
 		}
 	}
 }
@@ -155,7 +155,7 @@ static void MkRmpOnGrid(float _RmpF[NUM_CHANNELS][NUM_ENDPOINTS], float _MnMx[NU
 // this is how the end points is going to be look like when decompressed
 ------------------------------------------------------------------------------------------------*/
 inline void MkWkRmpPts(bool *_bEq, float _OutRmpPts[NUM_CHANNELS][NUM_ENDPOINTS],
-											 float _InpRmpPts[NUM_CHANNELS][NUM_ENDPOINTS], uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits)
+											 float const _InpRmpPts[NUM_CHANNELS][NUM_ENDPOINTS], uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits)
 {
 	float Fctrs[3];
 	Fctrs[RC] = (float)(1 << nRedBits);
@@ -173,7 +173,7 @@ inline void MkWkRmpPts(bool *_bEq, float _OutRmpPts[NUM_CHANNELS][NUM_ENDPOINTS]
 		for(int k = 0; k <2; k++)
 		{
 			// Apply the lower bit replication to give full dynamic range
-			_OutRmpPts[j][k] = _InpRmpPts[j][k] + floor(_InpRmpPts[j][k] / Fctrs[j]);
+			_OutRmpPts[j][k] = _InpRmpPts[j][k] + floorf(_InpRmpPts[j][k] / Fctrs[j]);
 			_OutRmpPts[j][k] = Math_MaxF(_OutRmpPts[j][k], 0.f);
 			_OutRmpPts[j][k] = Math_MinF(_OutRmpPts[j][k], 255.f);
 		}
@@ -185,7 +185,7 @@ uint32_t dwRndAmount[] = {0, 0, 0, 0, 1, 1, 2, 2, 3};
 /*------------------------------------------------------------------------------------------------
 1 DIM ramp 
 ------------------------------------------------------------------------------------------------*/
-inline void BldClrRmp(float _Rmp[MAX_POINTS], float _InpRmp[NUM_ENDPOINTS], uint8_t dwNumPoints)
+inline void BldClrRmp(float _Rmp[MAX_POINTS], float const _InpRmp[NUM_ENDPOINTS], uint8_t dwNumPoints)
 {
 	// linear interpolate end points to get the ramp 
 	_Rmp[0] = _InpRmp[0];
@@ -193,13 +193,13 @@ inline void BldClrRmp(float _Rmp[MAX_POINTS], float _InpRmp[NUM_ENDPOINTS], uint
 	if(dwNumPoints % 2)
 		_Rmp[dwNumPoints] = 1000000.f; // for 3 point ramp; not to select the 4th point as min
 	for(int e = 1; e < dwNumPoints - 1; e++)
-		_Rmp[e] = floor((_Rmp[0] * (dwNumPoints - 1 - e) + _Rmp[dwNumPoints - 1] * e + dwRndAmount[dwNumPoints])/ (float)(dwNumPoints - 1));
+		_Rmp[e] = floorf((_Rmp[0] * (dwNumPoints - 1 - e) + _Rmp[dwNumPoints - 1] * e + dwRndAmount[dwNumPoints])/ (float)(dwNumPoints - 1));
 }
 
 /*------------------------------------------------------------------------------------------------
 // build 3D ramp
 ------------------------------------------------------------------------------------------------*/
-inline void BldRmp(float _Rmp[NUM_CHANNELS][MAX_POINTS], float _InpRmp[NUM_CHANNELS][NUM_ENDPOINTS],
+inline void BldRmp(float _Rmp[NUM_CHANNELS][MAX_POINTS], float const _InpRmp[NUM_CHANNELS][NUM_ENDPOINTS],
 									 uint8_t dwNumPoints)
 {
 	for(int j = 0; j < 3; j++)
@@ -211,9 +211,9 @@ inline void BldRmp(float _Rmp[NUM_CHANNELS][MAX_POINTS], float _InpRmp[NUM_CHANN
 /*------------------------------------------------------------------------------------------------
 Compute cumulative error for the current cluster
 ------------------------------------------------------------------------------------------------*/
-static float ClstrErr(float _Blk[MAX_BLOCK][NUM_CHANNELS], float _Rpt[MAX_BLOCK],
+static float ClstrErr(float _Blk[MAX_BLOCK][NUM_CHANNELS], float const _Rpt[MAX_BLOCK],
 													 float _Rmp[NUM_CHANNELS][MAX_POINTS], int _NmbClrs, int _blcktp,
-													 bool _ConstRamp, float* _pfWeights)
+													 bool _ConstRamp, float const* _pfWeights)
 {
 	float fError = 0.f;
 	int rmp_l = (_ConstRamp) ? 1 : _blcktp;
@@ -257,7 +257,7 @@ static float ClstrErr(float _Blk[MAX_BLOCK][NUM_CHANNELS], float _Rpt[MAX_BLOCK]
 // Compute error and find DXTC indexes for the current cluster
 static float ClstrIntnl(float _Blk[MAX_BLOCK][NUM_CHANNELS], uint8_t* _Indxs,
 														 float _Rmp[NUM_CHANNELS][MAX_POINTS], int dwBlockSize, uint8_t dwNumPoints,
-														 bool _ConstRamp, float* _pfWeights, bool _bUseAlpha)
+														 bool _ConstRamp, float const* _pfWeights, bool _bUseAlpha)
 {
 	float Err = 0.f;
 	uint8_t rmp_l = (_ConstRamp) ? 1 : dwNumPoints;
@@ -320,7 +320,7 @@ static float ClstrIntnl(float _Blk[MAX_BLOCK][NUM_CHANNELS], uint8_t* _Indxs,
 // input ramp is on the coarse grid
 ------------------------------------------------------------------------------------------------*/
 static float ClstrBas(uint8_t* _Indxs, float _Blk[MAX_BLOCK][NUM_CHANNELS],
-													 float _InpRmp[NUM_CHANNELS][NUM_ENDPOINTS], int dwBlockSize, uint8_t dwNumPoints, float* _pfWeights,
+													 float const _InpRmp[NUM_CHANNELS][NUM_ENDPOINTS], int dwBlockSize, uint8_t dwNumPoints, float const* _pfWeights,
 													 bool _bUseAlpha, uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits)
 {
 	// make ramp endpoints the way they'll going to be decompressed
@@ -454,7 +454,7 @@ static float RampSrchW(float _Blck[MAX_BLOCK],
 		else if(_Blck[i] -  _max_ex >= 0)
 			v = _max_ex;
 		else
-			v = floor((del + step_h) * rstep) * step + _min_ex;
+			v = floorf((del + step_h) * rstep) * step + _min_ex;
 
 		// And accumulate the error
 		float d = (_Blck[i] - v);
@@ -477,7 +477,7 @@ static float RampSrchW(float _Blck[MAX_BLOCK],
 // Find a,b to minimize MSE between Z and Z_In
 static void FindAxis(float _outBlk[MAX_BLOCK][NUM_CHANNELS], float fLineDirection[NUM_CHANNELS],
 										 float fBlockCenter[NUM_CHANNELS], bool * _pbSmall, float _inpBlk[MAX_BLOCK][NUM_CHANNELS],
-										 float _inpRpt[MAX_BLOCK], int nDimensions, int nNumColors)
+										 float const _inpRpt[MAX_BLOCK], int nDimensions, int nNumColors)
 {
 	float Crrl[NUM_CHANNELS];
 	float RGB2[NUM_CHANNELS];
@@ -561,7 +561,7 @@ static void FindAxis(float _outBlk[MAX_BLOCK][NUM_CHANNELS], float fLineDirectio
 		for(j = 0; j < nDimensions; j++)
 		{
 			float Det = RGB2[j] * RGB2[(j+1)%3] - Crrl[j] * Crrl[j];
-			Cs[j] = fabs(Crrl[j]/sqrt(RGB2[j] * RGB2[(j+1)%3]));
+			Cs[j] = Math_AbsF(Crrl[j]/sqrtf(RGB2[j] * RGB2[(j+1)%3]));
 			if(maxDet < Det)
 			{
 				maxDet = Det;
@@ -599,7 +599,7 @@ static void FindAxis(float _outBlk[MAX_BLOCK][NUM_CHANNELS], float fLineDirectio
 
 	// normalize direction vector
 	float Len = fLineDirection[0] * fLineDirection[0] + fLineDirection[1] * fLineDirection[1] + fLineDirection[2] * fLineDirection[2];
-	Len = sqrt(Len);
+	Len = sqrtf(Len);
 
 	for(j = 0; j < 3; j++)
 		fLineDirection[j] = (Len > 0.f) ? fLineDirection[j] / Len : 0.f;
@@ -675,8 +675,8 @@ float Refine(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 	// First Red
 	float bstC0 = InpRmp0[RC][0];
 	float bstC1 = InpRmp0[RC][1];
-	int nRefineStart = 0 - (Math_MinF(nRefineSteps, (uint8_t)8));
-	int nRefineEnd = Math_MinF(nRefineSteps, (uint8_t)8);
+	int nRefineStart = 0 - ((int)Math_MinF(nRefineSteps, (uint8_t)8));
+	int nRefineEnd = (int)Math_MinF(nRefineSteps, (uint8_t)8);
 	for(int i = nRefineStart; i <= nRefineEnd; i++)
 	{
 		for(int j = nRefineStart; j <= nRefineEnd; j++)
@@ -885,8 +885,8 @@ float Refine3D(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 		return bestE;
 
 	// Jitter endpoints in each direction
-	int nRefineStart = 0 - (Math_MinF(nRefineSteps, (uint8_t)8));
-	int nRefineEnd = Math_MinF(nRefineSteps, (uint8_t)8);
+	int nRefineStart = 0 - ((int)Math_MinF(nRefineSteps, (uint8_t)8));
+	int nRefineEnd = (int)Math_MinF(nRefineSteps, (uint8_t)8);
 	for(int nJitterG0 = nRefineStart; nJitterG0 <= nRefineEnd; nJitterG0++)
 	{
 		InpRmp[GC][0] = Math_MinF(Math_MaxF(InpRmp0[GC][0] + nJitterG0 * Fctrs[GC], 0.f), 255.f);
@@ -1181,7 +1181,7 @@ static void CompressRGBBlockX(float _RsltRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 					else if(Prj0[i] -  Pos[1] >= 0)
 						RmpIndxs[i] = (float)(dwNumPoints - 1);
 					else
-						RmpIndxs[i] = floor((del + step_h) * rstep);
+						RmpIndxs[i] = floorf((del + step_h) * rstep);
 					// shift and normalization
 					RmpIndxs[i] = (RmpIndxs[i] - indxAvrg) * overBlkTp;
 				}
@@ -1207,7 +1207,7 @@ static void CompressRGBBlockX(float _RsltRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 					//  6. Plug the projections as a new directional vector for the axis.
 					//  7. Goto 1.
 					Len2 = LineDir[0] * LineDir[0] + LineDir[1] * LineDir[1] + LineDir[2] * LineDir[2];
-					Len2 = sqrt(Len2);
+					Len2 = sqrtf(Len2);
 
 					LineDir[0] /= Len2;
 					LineDir[1] /= Len2;
@@ -1494,7 +1494,7 @@ static void GetRmp1(float _rampDat[MAX_POINTS], float _ramp[NUM_ENDPOINTS], int 
 	{
 		for(int i = 0; i < nNumPoints; i++)
 		{
-			_rampDat[i] = floor(_rampDat[i] + 0.5f);
+			_rampDat[i] = floorf(_rampDat[i] + 0.5f);
 			_rampDat[i] /= FracFctr;
 		}
 	}
@@ -1585,7 +1585,7 @@ static float RmpSrch1(float _Blk[MAX_BLOCK],
 		else if(_Blk[i] -  _max_ex >= 0)
 			v = _max_ex;
 		else
-			v = (floor((del + step_h) * rstep) * step) + _min_ex;
+			v = (floorf((del + step_h) * rstep) * step) + _min_ex;
 
 		// And accumulate the error
 		float del2 = (_Blk[i] - v);
@@ -1743,12 +1743,12 @@ static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS], float _Blk[MAX_BLOCK], in
 		{
 			if(dwUniqueValues == 2) // if 2, take them
 			{
-				Ramp[0]  = floor(afUniqueValues[0] * (IntFctr - 1) + 0.5f);
-				Ramp[1]  = floor(afUniqueValues[1] * (IntFctr - 1) + 0.5f);
+				Ramp[0]  = floorf(afUniqueValues[0] * (IntFctr - 1) + 0.5f);
+				Ramp[1]  = floorf(afUniqueValues[1] * (IntFctr - 1) + 0.5f);
 			}
 			else if(dwUniqueValues == 1) // if 1, add another one
 			{
-				Ramp[0]  = floor(afUniqueValues[0] * (IntFctr - 1) + 0.5f);
+				Ramp[0]  = floorf(afUniqueValues[0] * (IntFctr - 1) + 0.5f);
 				Ramp[1] = Ramp[0] + 1.f;
 			}
 			else // if 0, invent them 
@@ -1778,11 +1778,11 @@ static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS], float _Blk[MAX_BLOCK], in
 		// if number of unique colors is less or eq 2, we've done 
 		if(dwUniqueValues <= 2)
 		{
-			Ramp[0] = floor(afUniqueValues[0] * (IntFctr - 1) + 0.5f);
+			Ramp[0] = floorf(afUniqueValues[0] * (IntFctr - 1) + 0.5f);
 			if(dwUniqueValues == 1)
 				Ramp[1] = Ramp[0] + 1.f;
 			else
-				Ramp[1] = floor(afUniqueValues[1] * (IntFctr - 1) + 0.5f);
+				Ramp[1] = floorf(afUniqueValues[1] * (IntFctr - 1) + 0.5f);
 			fMaxError = 0.f;
 			requiresCalculation = false;
 		}
@@ -1852,22 +1852,22 @@ static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS], float _Blk[MAX_BLOCK], in
 		So we try to run the same refinement procedure but with starting position on the integer grid
 		and step equal 1.
 		*/
-		if(!_INT_GRID && max_ex - min_ex > 0. && floor(min_ex + 0.5f) == floor(max_ex + 0.5f))
+		if(!_INT_GRID && max_ex - min_ex > 0. && floorf(min_ex + 0.5f) == floorf(max_ex + 0.5f))
 		{
 			m_step = 1.;
 			gbl_err = MAX_ERROR;
 			for(uint32_t i = 0; i < dwUniqueValues; i++)
 				afUniqueValues[i] *= (IntFctr - 1);
 
-			max_ex = min_ex = floor(min_ex + 0.5f);
+			max_ex = min_ex = floorf(min_ex + 0.5f);
 
 			gbl_err = Refine1(afUniqueValues, afValueRepeats, gbl_err, min_ex, max_ex, m_step, 0.f, 255.f, dwUniqueValues, dwNumPoints, _bUseSSE2);
 
 			fMaxError = gbl_err;
 
 		}
-		Ramp[1] = floor(max_ex + 0.5f);
-		Ramp[0] = floor(min_ex + 0.5f);
+		Ramp[1] = floorf(max_ex + 0.5f);
+		Ramp[0] = floorf(min_ex + 0.5f);
 	}
 
 	// Ensure that the two endpoints are not the same

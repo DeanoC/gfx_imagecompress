@@ -1,6 +1,4 @@
 #pragma once
-#ifndef GFX_IMAGECOMPRESS_IMAGECOMPRESS_H_
-#define GFX_IMAGECOMPRESS_IMAGECOMPRESS_H_ 1
 
 #include "gfx_image/image.h"
 
@@ -61,5 +59,3 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC4(Image_ImageHeader c
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC5(Image_ImageHeader const *src, Image_CompressProgressFunc progressCallback, void* userCallbackData);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC6H(Image_ImageHeader const *src, Image_CompressAMDBackendOptions const* amdOptions, Image_CompressProgressFunc progressCallback, void* userCallbackData);
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader const *src, Image_CompressAMDBackendOptions const* amdOptions, Image_CompressProgressFunc progressCallback, void* userCallbackData);
-
-#endif // end GFX_IMAGECOMPRESS_IMAGECOMPRESS_H_
