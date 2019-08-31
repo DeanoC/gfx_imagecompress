@@ -9,7 +9,7 @@
 #define LOAD_DDS(filename, img) { VFile::ScopedFile fh = VFile::File::FromFile("artifacts/" filename, Os_FM_ReadBinary); \
 	REQUIRE(fh); img = Image_LoadDDS(fh); }
 #define SAVE_DDS(img, filename) { VFile::ScopedFile fh = VFile::File::FromFile("artifacts/" filename, Os_FM_WriteBinary); \
-	REQUIRE(fh); Image_SaveDDS(img, fh); }
+	REQUIRE(fh); Image_SaveAsDDS(img, fh); }
 
 static void GenerateTestPatternR(Image_ImageHeader const* image) {
 	Image_PixelD const red = { 1, 0, 0, 1 };
@@ -18,7 +18,7 @@ static void GenerateTestPatternR(Image_ImageHeader const* image) {
 		for(auto x = 0u;x < image->width;++x) {
 			size_t index = Image_CalculateIndex(image, x, y, 0, 0);
 			Image_PixelD col = red;
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -30,7 +30,7 @@ static void GenerateTestPatternG(Image_ImageHeader const* image) {
 		for(auto x = 0u;x < image->width;++x) {
 			size_t index = Image_CalculateIndex(image, x, y, 0, 0);
 			Image_PixelD col = green;
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -42,7 +42,7 @@ static void GenerateTestPatternB(Image_ImageHeader const* image) {
 		for(auto x = 0u;x < image->width;++x) {
 			size_t index = Image_CalculateIndex(image, x, y, 0, 0);
 			Image_PixelD col = blue;
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -60,7 +60,7 @@ static void GenerateTestPatternRGB(Image_ImageHeader const* image) {
 			if(((x / 2) & 2) || ((y / 2) & 2)) col = red;
 			if(((x / 3) % 3) && ((y / 3) % 3)) col = blue;
 
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -80,7 +80,7 @@ static void GenerateTestPatternRGB_Punchthrough(Image_ImageHeader const* image) 
 			if(((x / 3) % 3) && ((y / 3) % 3)) col = blue;
 			if(x > image->width/2 && y > image->height/2) {col = nada; }
 
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -100,7 +100,7 @@ static void GenerateTestPatternRGBA(Image_ImageHeader const* image) {
 
 			col.a	= (float)x / (float)image->width;
 
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -120,7 +120,7 @@ static void GenerateTestPatternFloatRGBA(Image_ImageHeader const* image) {
 
 			col.a	= (float)x / (float)image->width;
 
-			Image_SetPixelAt(image, &col, index);
+			Image_SetPixelAtD(image, (double const*)&col, index);
 		}
 	}
 }
@@ -138,7 +138,7 @@ TEST_CASE("AMD BC1 Direct RGB", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC1_RGB_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC1_RGB_UNORM);
 	Image_Destroy(image);
 	Image_Destroy(dst);
 }
@@ -156,7 +156,7 @@ TEST_CASE("AMD BC1 Direct RGB npot", "[ImageCompress]") {
 	REQUIRE(dst->height == 260);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC1_RGB_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC1_RGB_UNORM);
 
 	SAVE_DDS(dst, "compress_BC1_RGB_UNORM_260x260.dds")
 
@@ -181,7 +181,7 @@ TEST_CASE("AMD BC1 Direct RGB Alpha options src no alpha", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC1_RGBA_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC1_RGBA_UNORM);
 
 	SAVE_DDS(dst, "compress_BC1_RGBA_UNORM_256x256.dds")
 
@@ -207,7 +207,7 @@ TEST_CASE("AMD BC1 Direct RGB Alpha options src with alpha", "[ImageCompress]") 
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC1_RGBA_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC1_RGBA_UNORM);
 
 	SAVE_DDS(dst, "compress_punchthrough_BC1_RGBA_UNORM_256x256.dds")
 
@@ -228,7 +228,7 @@ TEST_CASE("AMD BC2 Direct RGBA", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC2_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC2_UNORM);
 
 	SAVE_DDS(dst, "compress_BC2_UNORM_256x256.dds")
 
@@ -249,9 +249,9 @@ TEST_CASE("AMD BC3 Direct RGBA", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC3_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC3_UNORM);
 
-	SAVE_DDS(dst, "compress_BC3_UNORM_256x256.dds")
+	SAVE_DDS(dst, "compress_DXBC3_UNORM_256x256.dds")
 
 	Image_Destroy(image);
 	Image_Destroy(dst);
@@ -270,7 +270,7 @@ TEST_CASE("AMD BC4 Direct R", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC4_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC4_UNORM);
 
 	SAVE_DDS(dst, "compress_BC4_UNORM_256x256.dds")
 
@@ -290,7 +290,7 @@ TEST_CASE("AMD BC5 Direct RG", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC5_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC5_UNORM);
 
 	SAVE_DDS(dst, "compress_BC5_UNORM_256x256.dds")
 
@@ -311,7 +311,7 @@ TEST_CASE("AMD BC6H Direct RGBA", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC6H_SFLOAT_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC6H_SFLOAT);
 
 	SAVE_DDS(dst, "compress_BC6H_SFLOAT_32x32.dds")
 
@@ -332,7 +332,7 @@ TEST_CASE("AMD BC7 Direct R", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
 
 	SAVE_DDS(dst, "compress_R_BC7_UNORM_32x32.dds")
 
@@ -353,7 +353,7 @@ TEST_CASE("AMD BC7 Direct G", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
 
 	SAVE_DDS(dst, "compress_G_BC7_UNORM_32x32.dds")
 
@@ -374,7 +374,7 @@ TEST_CASE("AMD BC7 Direct B", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
 
 	SAVE_DDS(dst, "compress_B_BC7_UNORM_32x32.dds")
 
@@ -395,7 +395,7 @@ TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
 
 	SAVE_DDS(dst, "compress_BC7_UNORM_32x32.dds")
 
@@ -419,7 +419,7 @@ TEST_CASE("AMD BC6H Direct RGBA 256", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC6H_SFLOAT_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC6H_SFLOAT);
 
 	SAVE_DDS(dst, "compress_BC6H_SFLOAT_256x256.dds")
 
@@ -440,7 +440,7 @@ TEST_CASE("AMD BC7 Direct RGB 256", "[ImageCompress]") {
 	REQUIRE(dst->height == image->height);
 	REQUIRE(dst->depth == image->depth);
 	REQUIRE(dst->slices == image->slices);
-	REQUIRE(dst->format == TinyImageFormat_BC7_UNORM_BLOCK);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
 
 	SAVE_DDS(dst, "compress_BC7_UNORM_256x256.dds")
 
