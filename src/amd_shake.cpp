@@ -240,12 +240,12 @@ const float rampLerpWeights[5][1 << MAX_INDEX_BITS] =
 		 34.0/64.0, 38.0/64.0, 43.0/64.0, 47.0/64.0, 51.0/64.0, 55.0/64.0, 60.0/64.0, 1.0} // 4 bit index
 #else
 				// Pure linear weights
-				{0.0},  // 0 bit index
-				{0.0, 1.0}, // 1 bit index
-				{0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0}, // 2 bit index
-				{0.0, 1.0 / 7.0, 2.0 / 7.0, 3.0 / 7.0, 4.0 / 7.0, 5.0 / 7.0, 6.0 / 7.0, 1.0}, // 3 bit index
-				{0.0, 1.0 / 15.0, 2.0 / 15.0, 3.0 / 15.0, 4.0 / 15.0, 5.0 / 15.0, 6.0 / 15.0, 7.0 / 15.0,
-				 8.0 / 15.0, 9.0 / 15.0, 10.0 / 15.0, 11.0 / 15.0, 12.0 / 15.0, 13.0 / 15.0, 14.0 / 15.0, 1.0} // 4 bit index
+				{0.0f},  // 0 bit index
+				{0.0f, 1.0f}, // 1 bit index
+				{0.0f, 1.0f / 3.0f, 2.0f / 3.0f, 1.0f}, // 2 bit index
+				{0.0f, 1.0f / 7.0f, 2.0f / 7.0f, 3.0f / 7.0f, 4.0f / 7.0f, 5.0f / 7.0f, 6.0f / 7.0f, 1.0f}, // 3 bit index
+				{0.0f, 1.0f / 15.0f, 2.0f / 15.0f, 3.0f / 15.0f, 4.0f / 15.0f, 5.0f / 15.0f, 6.0f / 15.0f, 7.0f / 15.0f,
+				 8.0f / 15.0f, 9.0f / 15.0f, 10.0f / 15.0f, 11.0f / 15.0f, 12.0f / 15.0f, 13.0f / 15.0f, 14.0f / 15.0f, 1.0f} // 4 bit index
 #endif
 		};
 //
@@ -278,10 +278,10 @@ void init_ramps(void) {
 				for (p2 = 0; p2 < (1 << bits); p2++) {
 					for (i = 0; i < (1 << clog); i++)
 						ramp[CLT(clog)][BTT(bits)][p1][p2][i] =
-								floor(
+								floorf(
 										(float) ep_d[BTT(bits)][p1]
 												+ rampLerpWeights[clog][i] * (float) ((ep_d[BTT(bits)][p2] - ep_d[BTT(bits)][p1]))
-												+ 0.5);
+												+ 0.5f);
 
 #ifdef GIG_TABLE
 					float v;
@@ -337,7 +337,7 @@ void init_ramps(void) {
 										sp_idx[CLT(clog)][BTT(bits)][j][o1][o2][i][0] = sp_idx[CLT(clog)][BTT(bits)][j + k][o1][o2][i][0];
 										sp_idx[CLT(clog)][BTT(bits)][j][o1][o2][i][1] = sp_idx[CLT(clog)][BTT(bits)][j + k][o1][o2][i][1];
 									}
-									sp_err[CLT(clog)][BTT(bits)][j][o1][o2][i] = k * k;
+									sp_err[CLT(clog)][BTT(bits)][j][o1][o2][i] = (float)k * (float)k;
 								}
 							}
 
@@ -639,8 +639,8 @@ float BC7BlockEncoder::quant_single_point(
 								dr[j] = (int) floor(data[0][j] + 0.5);
 
 							tr = sp_err[CLT(clog)][BTT(bits[j])][dr[j]][t1][t2][i] +
-									2 * sqrt(sp_err[CLT(clog)][BTT(bits[j])][dr[j]][t1][t2][i]) * fabs((float) dr[j] - data[0][j]) +
-									(dr[j] - data[0][j]) * (dr[j] - data[0][j]);
+									2 * sqrtf(sp_err[CLT(clog)][BTT(bits[j])][dr[j]][t1][t2][i]) * fabsf((float) dr[j] - data[0][j]) +
+									((float)dr[j] - data[0][j]) * ((float)dr[j] - data[0][j]);
 
 							if (tr < t_) {
 								t_ = tr;
@@ -826,7 +826,7 @@ float BC7BlockEncoder::ep_shaker_2(
 					// round
 					for (i = 0; i < ncl; i++)
 						for (j = 0; j < dimension; j++)
-							cc[i_comp[i]][j] = floor(cc[i_comp[i]][j] + 0.5); // more or less ideal location
+							cc[i_comp[i]][j] = floorf(cc[i_comp[i]][j] + 0.5f); // more or less ideal location
 
 					for (j = 0; j < dimension; j++)
 						rp[0][j] = rp[1][j] = 0;
@@ -1131,7 +1131,7 @@ float BC7BlockEncoder::ep_shaker(
 					// round
 					for (i = 0; i < ncl; i++)
 						for (j = 0; j < dimension; j++)
-							cc[i_comp[i]][j] = floor(cc[i_comp[i]][j] + 0.5); // more or less ideal location
+							cc[i_comp[i]][j] = floorf(cc[i_comp[i]][j] + 0.5f); // more or less ideal location
 
 					for (j = 0; j < dimension; j++) {
 						rp[0][j] = rp[1][j] = 0;

@@ -105,11 +105,11 @@ public:
 		else
 			m_validModeMask = validModeMask;
 
-		m_quality            = Math_MinD(1.0, Math_MaxD(quality,0.0));
-		m_performance        = Math_MinD(1.0, Math_MaxD(performance,0.0));
+		m_quality            = Math_MinF(1.0f, Math_MaxF(quality,0.0f));
+		m_performance        = Math_MinF(1.0f, Math_MaxF(performance,0.0f));
 		m_imageNeedsAlpha    = imageNeedsAlpha;
-		m_smallestError      = DBL_MAX;
-		m_largestError       = 0.0;
+		m_smallestError      = FLT_MAX;
+		m_largestError       = 0.0f;
 		m_colourRestrict     = colourRestrict;
 		m_alphaRestrict      = alphaRestrict;
 
@@ -121,9 +121,9 @@ public:
 
 			// Scale m_quality to be a linar range 0 to 1 in this section 
 			// to maximize quality with fast performance...
-			m_errorThreshold = 256. * (1.0 - ((m_quality*2.0)/g_qFAST_THRESHOLD));
+			m_errorThreshold = 256.0f * (1.0f - ((m_quality*2.0f)/g_qFAST_THRESHOLD));
 			// Limit the size of the partition search space based on Quality
-			m_partitionSearchSize = Math_MaxD( (1.0/16.0) , ((m_quality*2.0) / g_qFAST_THRESHOLD));
+			m_partitionSearchSize = Math_MaxF( (1.0f/16.0f) , ((m_quality*2.0f) / g_qFAST_THRESHOLD));
 		}
 		else
 		{
@@ -135,9 +135,9 @@ public:
 			if(m_quality < g_HIGHQULITY_THRESHOLD)
 			{
 				m_shakerRangeThreshold  = 255 * (m_quality / 10);                    // gain  performance within FAST_THRESHOLD and HIGHQULITY_THRESHOLD range
-				m_errorThreshold = 256. * (1.0 - (m_quality/g_qFAST_THRESHOLD));
+				m_errorThreshold = 256.0f * (1.0f - (m_quality/g_qFAST_THRESHOLD));
 				// Limit the size of the partition search space based on Quality
-				m_partitionSearchSize = Math_MaxD( (1.0/16.0) , (m_quality / g_qFAST_THRESHOLD));
+				m_partitionSearchSize = Math_MaxF( (1.0f/16.0f) , (m_quality / g_qFAST_THRESHOLD));
 			}
 			else
 			{

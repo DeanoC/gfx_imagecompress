@@ -2468,8 +2468,8 @@ float ep_shaker_HD(
 					for (j = 0; j<(1 << clog); j++)
 						for (k = 0; k < dimension; k++)
 						{
-							ce[i][j][k] = (rampf(CLT(clog), BTT(bits[k]), epd[0][k][0], epd[1][k][0], j) - d[k])*
-									(rampf(CLT(clog), BTT(bits[k]), epd[0][k][0], epd[1][k][0], j) - d[k]);
+							ce[i][j][k] = (rampf(CLT(clog), BTT(bits[k]), (int)epd[0][k][0], (int)epd[1][k][0], j) - d[k])*
+									(rampf(CLT(clog), BTT(bits[k]), (int)epd[0][k][0], (int)epd[1][k][0], j) - d[k]);
 						}
 				}
 
@@ -2511,8 +2511,8 @@ float ep_shaker_HD(
 						for (j = 0; j<(1 << clog); j++)
 						{
 							float t_ = 0.;
-							ce[i][j][j0] = (rampf(CLT(clog), BTT(bits[j0]), epd[0][j0][ei0], epd[1][j0][ei1], j) - d[j0])*
-									(rampf(CLT(clog), BTT(bits[j0]), epd[0][j0][ei0], epd[1][j0][ei1], j) - d[j0]);
+							ce[i][j][j0] = (rampf(CLT(clog), BTT(bits[j0]), (int)epd[0][j0][ei0], (int)epd[1][j0][ei1], j) - d[j0])*
+									(rampf(CLT(clog), BTT(bits[j0]), (int)epd[0][j0][ei0], (int)epd[1][j0][ei1], j) - d[j0]);
 							for (k = 0; k<dimension; k++)
 							{
 								t_ += ce[i][j][k];
@@ -2528,7 +2528,7 @@ float ep_shaker_HD(
 						idx_0[i] = ci;
 						for (k = 0; k<dimension; k++)
 						{
-							out_0[i][k] = rampf(CLT(clog), BTT(bits[k]), epd[0][k][ei0], epd[1][k][ei1], ci);
+							out_0[i][k] = rampf(CLT(clog), BTT(bits[k]), (int)epd[0][k][ei0], (int)epd[1][k][ei1], ci);
 						}
 						err_0 += cmin;
 					}

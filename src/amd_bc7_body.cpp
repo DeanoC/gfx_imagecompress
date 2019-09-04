@@ -198,15 +198,15 @@ void GetRamp(uint32_t endpoint[][MAX_DIMENSION_BIG],
 	// Generate colours for the RGB ramp
 	for (i = 0; i < clusters[0]; i++) {
 #ifdef USE_HIGH_PRECISION_INTERPOLATION_BC7
-		ramp[COMP_RED][i] = floor((ep[0][COMP_RED] * (1.0 - rampLerpWeights[rampIndex][i])) +
-				(ep[1][COMP_RED] * rampLerpWeights[rampIndex][i]) + 0.5);
-		ramp[COMP_RED][i] = Math_MinF(255.0, Math_MaxF(0., ramp[COMP_RED][i]));
-		ramp[COMP_GREEN][i] = floor((ep[0][COMP_GREEN] * (1.0 - rampLerpWeights[rampIndex][i])) +
-				(ep[1][COMP_GREEN] * rampLerpWeights[rampIndex][i]) + 0.5);
-		ramp[COMP_GREEN][i] = Math_MinF(255.0, Math_MaxF(0., ramp[COMP_GREEN][i]));
-		ramp[COMP_BLUE][i] = floor((ep[0][COMP_BLUE] * (1.0 - rampLerpWeights[rampIndex][i])) +
-				(ep[1][COMP_BLUE] * rampLerpWeights[rampIndex][i]) + 0.5);
-		ramp[COMP_BLUE][i] = Math_MinF(255.0, Math_MaxF(0., ramp[COMP_BLUE][i]));
+		ramp[COMP_RED][i] = floorf((ep[0][COMP_RED] * (1.0f - rampLerpWeights[rampIndex][i])) +
+				(ep[1][COMP_RED] * rampLerpWeights[rampIndex][i]) + 0.5f);
+		ramp[COMP_RED][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ramp[COMP_RED][i]));
+		ramp[COMP_GREEN][i] = floorf((ep[0][COMP_GREEN] * (1.0f - rampLerpWeights[rampIndex][i])) +
+				(ep[1][COMP_GREEN] * rampLerpWeights[rampIndex][i]) + 0.5f);
+		ramp[COMP_GREEN][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ramp[COMP_GREEN][i]));
+		ramp[COMP_BLUE][i] = floorf((ep[0][COMP_BLUE] * (1.0f - rampLerpWeights[rampIndex][i])) +
+				(ep[1][COMP_BLUE] * rampLerpWeights[rampIndex][i]) + 0.5f);
+		ramp[COMP_BLUE][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ramp[COMP_BLUE][i]));
 #else
 		ramp[COMP_RED][i] = interpolate(ep[0][COMP_RED], ep[1][COMP_RED], i, rampIndex);
 				ramp[COMP_GREEN][i] = interpolate(ep[0][COMP_GREEN], ep[1][COMP_GREEN], i, rampIndex);
@@ -226,9 +226,9 @@ void GetRamp(uint32_t endpoint[][MAX_DIMENSION_BIG],
 		// Generate alphas
 		for (i = 0; i < clusters[1]; i++) {
 #ifdef USE_HIGH_PRECISION_INTERPOLATION_BC7
-			ramp[COMP_ALPHA][i] = floor((ep[0][COMP_ALPHA] * (1.0 - rampLerpWeights[rampIndex][i])) +
-					(ep[1][COMP_ALPHA] * rampLerpWeights[rampIndex][i]) + 0.5);
-			ramp[COMP_ALPHA][i] = Math_MinF(255.0, Math_MaxF(0., ramp[COMP_ALPHA][i]));
+			ramp[COMP_ALPHA][i] = floorf((ep[0][COMP_ALPHA] * (1.0f - rampLerpWeights[rampIndex][i])) +
+					(ep[1][COMP_ALPHA] * rampLerpWeights[rampIndex][i]) + 0.5f);
+			ramp[COMP_ALPHA][i] = Math_MinF(255.0f, Math_MaxF(0.f, ramp[COMP_ALPHA][i]));
 #else
 			ramp[COMP_ALPHA][i] = interpolate(ep[0][COMP_ALPHA], ep[1][COMP_ALPHA], i, rampIndex);
 #endif
@@ -241,11 +241,11 @@ void GetRamp(uint32_t endpoint[][MAX_DIMENSION_BIG],
 // Default FQuality is at 0.1 < g_qFAST_THRESHOLD which will cause the SingleIndex compression to start skipping shape blocks
 // during compression
 // if user sets a value above this then all shapes will be used for compression scan for quality
-float g_qFAST_THRESHOLD = 0.5;
+float cog_qFAST_THRESHOLD = 0.5f;
 
 // This limit is used for DualIndex Block and if fQuality is above this limit then Quantization shaking will always be performed
 // on all indexs
-float g_HIGHQULITY_THRESHOLD = 0.7;
+float  g_HIGHQULITY_THRESHOLD = 0.7f;
 
 //
 // For a given block mode this sets up the data needed by the compressor
@@ -597,7 +597,7 @@ float BC7BlockEncoder::CompressSingleIndexBlock(float const in[MAX_SUBSET_SIZE *
 	int bestIndices[MAX_SUBSETS][MAX_SUBSET_SIZE];
 	uint32_t bestEntryCount[MAX_SUBSETS];
 	uint32_t bestPartition = 0;
-	float bestError = DBL_MAX;
+	float bestError = FLT_MAX;
 
 	// Extensive shaking is most important when the ramp is short, and
 	// when we have less indices. On a long ramp the quality of the
@@ -934,9 +934,9 @@ float BC7BlockEncoder::CompressDualIndexBlock(float const in[MAX_SUBSET_SIZE * M
 	float step;
 
 	float quantizerError;
-	float bestQuantizerError = DBL_MAX;
+	float bestQuantizerError = FLT_MAX;
 	float overallError;
-	float bestOverallError = DBL_MAX;
+	float bestOverallError = FLT_MAX;
 
 	// Go through each possible rotation and selection of indices
 	for (rotation = 0; rotation < maxRotation; rotation++) { // A
@@ -987,7 +987,7 @@ float BC7BlockEncoder::CompressDualIndexBlock(float const in[MAX_SUBSET_SIZE * M
 																				outQ[1],
 																				direction,
 																				&step,
-																				3) / 3.;
+																				3) / 3.0f;
 			} else {
 				quantizerError += optQuantTrace_d(aBlock,
 																					MAX_SUBSET_SIZE,
@@ -996,7 +996,7 @@ float BC7BlockEncoder::CompressDualIndexBlock(float const in[MAX_SUBSET_SIZE * M
 																					outQ[1],
 																					direction,
 																					&step,
-																					3) / 3.;
+																					3) / 3.0f;
 
 			}
 
@@ -1072,7 +1072,7 @@ float BC7BlockEncoder::CompressDualIndexBlock(float const in[MAX_SUBSET_SIZE * M
 																				(1 << bti[blockMode].indexBits[1 ^ indexSelection]) - 1,
 																				bits[1][3],
 																				3,
-																				epo) / 3.;
+																				epo) / 3.0f;
 				} else {
 					ep_shaker(aBlock,
 											MAX_SUBSET_SIZE,
@@ -1093,7 +1093,7 @@ float BC7BlockEncoder::CompressDualIndexBlock(float const in[MAX_SUBSET_SIZE * M
 																				(1 << bti[blockMode].indexBits[1 ^ indexSelection]) - 1,
 																				bits[1][3],
 																				3,
-																				epo) / 3.;
+																				epo) / 3.0f;
 				}
 
 				// If we beat the previous best then encode the block

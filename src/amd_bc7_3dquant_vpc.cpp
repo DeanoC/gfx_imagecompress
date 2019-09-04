@@ -25,7 +25,7 @@
 #include "al2o3_platform/platform.h"
 #include "amd_bc7_3dquant_vpc.hpp"
 
-#define EPSILON        0.000001
+#define EPSILON        0.000001f
 #undef MAX_TRY
 #define MAX_TRY        20
 #undef DBL_MAX_EXP
@@ -322,7 +322,7 @@ void eigenVector(float cov[DIMENSION][DIMENSION], float vector[DIMENSION])
 		vector[i]=c[l][k][i];
 	}
 	// normalization is really optional
-	t= sqrt(t);
+	t= sqrtf(t);
 	ASSERT(t>0);
 	if (t<=0)
 	{
@@ -409,7 +409,7 @@ void eigenVector_d(float cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], float vector
 		vector[i]=c[l][k][i];
 	}
 	// normalization is really optional
-	t= sqrt(t);
+	t= sqrtf(t);
 	ASSERT(t>0);
 	if (t<=0)
 	{
@@ -518,10 +518,10 @@ void quantEven(float data[MAX_ENTRIES][DIMENSION],int numEntries, int numCluster
 	for(i=0;i<DIMENSION;i++)
 		dpAcc[0][i]=dpAcc[1][i]=0;
 
-	S =  1/sqrt((float) numEntries);
+	S = 1.0f / sqrtf((float) numEntries);
 
 	for(i=1;i<MAX_CLUSTERS;i++) {
-		dRamp2[i] = 2*i-1;
+		dRamp2[i] = 2.0f * (float)i - 1.0f;
 	}
 
 	level=1;
@@ -621,9 +621,9 @@ void quantLineConstr(float data[][DIMENSION], int order[MAX_ENTRIES],int numEntr
 
 		k = order[--cluster[level-1]];
 
-		s=(cluster[level-1]-cluster[level-2]) == 0 ? 0: 1/sqrt( (float) (cluster[level-1]-cluster[level-2])); // see cluster_ decl for
+		s=(cluster[level-1]-cluster[level-2]) == 0 ? 0: 1/sqrtf( (float) (cluster[level-1]-cluster[level-2])); // see cluster_ decl for
 		// cluster[-1] value
-		t=1/sqrt((float) (numEntries-cluster[level-1]));
+		t=1/sqrtf((float) (numEntries-cluster[level-1]));
 
 		for(i=0;i<DIMENSION;i++) {
 			gcAcc[level  ][i] += data[k][i];
@@ -755,7 +755,7 @@ float optQuantEven(
 
 			// However, the EPSILON should be scaled, otherwise is does not make sense
 
-			t = sqrt(t)*EPSILON;
+			t = sqrtf(t)*EPSILON;
 
 			project(centered, numEntries, direction, projected);
 
@@ -802,15 +802,15 @@ float optQuantEven(
 	ASSERT(t !=0);
 
 
-	t = (t == 0 ? 0. : 1/t);
+	t = (t == 0 ? 0.f : 1.0f/t);
 
 	for (i=0;i<numEntries;i++)
 		for (j=0;j<DIMENSION;j++)
-			out[order[i]][j]=mean[j]+direction[j]*t*(index[i]-s);
+			out[order[i]][j]=mean[j]+direction[j]*t*((float)index[i]-s);
 
 	// normalize direction for output
 
-	q=sqrt(q);
+	q=sqrtf(q);
 	*step=t*q;
 	for (j=0;j<DIMENSION;j++)
 		direction[j]/=q;
@@ -929,7 +929,7 @@ float optQuantLineConstr(
 
 			// However, the EPSILON should be scaled, otherwise is does not make sense
 
-			t = sqrt(t)*EPSILON;
+			t = sqrtf(t)*EPSILON;
 
 			project(centered, numEntries, direction, projected);
 
@@ -967,7 +967,7 @@ float optQuantLineConstr(
 	for(i=0;i<numClusters;i++)
 		for (j=0;j<DIMENSION;j++)
 			if (gcS[i]!=0) {
-				gcSAcc[i][j] = gcAcc[i][j]/sqrt((float)gcS[i]);
+				gcSAcc[i][j] = gcAcc[i][j]/sqrtf((float)gcS[i]);
 				gcAcc[i][j] /= ((float)gcS[i]);
 			}
 			else
@@ -1238,7 +1238,7 @@ void quant_AnD_Shell(float* v_, int k, int n, int *idx) {
 	for (i=0; i < n;i++) {
 		v[i] = v_[i]*s;
 
-		idx[i]=(int)(z[i] = floor(v[i] +0.5 /* stabilizer*/ - m *s));
+		idx[i]=(int)(z[i] = floorf(v[i] + 0.5f /* stabilizer*/ - m *s));
 
 		d[i].d = v[i]-z[i]- m *s;
 		d[i].i = i;
@@ -1257,9 +1257,9 @@ void quant_AnD_Shell(float* v_, int k, int n, int *idx) {
 		// got into fundamental simplex
 		// move coordinate system origin to its center
 		for (i=0; i < n;i++)
-			d[i].d -= (2.*(float)i+1-(float)n)/2./(float)n;
+			d[i].d -= (2.0f * (float)i + 1.0f - (float)n) / (2.0f * (float)n);
 
-		mm=l=0.;
+		mm=l=0.0f;
 		j=-1;
 		for (i=0; i < n;i++) {
 			l+=d[i].d;
@@ -1357,7 +1357,7 @@ float optQuantTrace(
 
 			// However, the EPSILON should be scaled, otherwise is does not make sense
 
-			t = sqrt(t)*EPSILON;
+			t = sqrtf(t)*EPSILON;
 
 			project(centered, numEntries, direction, projected);
 
@@ -1402,7 +1402,7 @@ float optQuantTrace(
 	ASSERT(t !=0);
 
 
-	t = (t == 0 ? 0. : 1/t);
+	t = (t == 0 ? 0.0f : 1.0f/t);
 
 	for (i=0;i<numEntries;i++) {
 		for (j=0;j<DIMENSION;j++)
@@ -1413,7 +1413,7 @@ float optQuantTrace(
 
 	// normalize direction for output
 
-	q=sqrt(q);
+	q=sqrtf(q);
 	*step=t*q;
 	for (j=0;j<DIMENSION;j++)
 		direction[j]/=q;
@@ -1486,7 +1486,7 @@ float optQuantTrace_d(
 
 			// However, the EPSILON should be scaled, otherwise is does not make sense
 
-			t = sqrt(t)*EPSILON;
+			t = sqrtf(t)*EPSILON;
 
 			project_d(centered, numEntries, direction, projected, dimension);
 
@@ -1532,7 +1532,7 @@ float optQuantTrace_d(
 
 	ASSERT(t !=0);
 
-	t = (t == 0 ? 0. : 1/t);
+	t = (t == 0 ? 0.0f : 1.0f / t);
 
 	for (i=0;i<numEntries;i++)
 	{
@@ -1543,7 +1543,7 @@ float optQuantTrace_d(
 
 	// normalize direction for output
 
-	q=sqrt(q);
+	q=sqrtf(q);
 	*step=t*q;
 
 	for (j=0;j<dimension;j++)
@@ -1635,7 +1635,7 @@ void traceBuilder (int numEntries, int numClusters,struct TRACE tr [], int code[
 												if (c < MAX_TRACE) // NP
 												{
 													tr[c].k=2*ci+1;
-													tr[c].d=1./((float) q2 - (float) q*(float) q /(float) (numEntries));
+													tr[c].d=1.0f / ((float) q2 - (float) q*(float) q /(float) (numEntries));
 													code[c]=cd;
 													c++;
 												}
@@ -1679,7 +1679,7 @@ void traceBuilder (int numEntries, int numClusters,struct TRACE tr [], int code[
 												if (c < MAX_TRACE) // NP
 												{
 													tr[c].k=2*ci;
-													tr[c].d=1./((float) q2 - (float) q*(float) q /(float) (numEntries));
+													tr[c].d=1.f / ((float) q2 - (float) q*(float) q /(float) (numEntries));
 													code[c]=cd;
 													c++;
 												}
@@ -1782,10 +1782,10 @@ float optQuantAnD(
 				s /= (float) numEntries;
 				t = t - s * s * (float) numEntries;
 				ASSERT(t !=0);
-				t = (t == 0 ? 0. : 1/t);
+				t = (t == 0 ? 0.f : 1.0f / t);
 				// We need to requantize
 
-				q = sqrt(q);
+				q = sqrtf(q);
 				t *=q;
 
 				if (q !=0)
@@ -1853,7 +1853,7 @@ float optQuantAnD(
 	ASSERT(t !=0);
 
 
-	t = (t == 0 ? 0. : 1/t);
+	t = (t == 0 ? 0.f : 1.0f / t);
 
 	for (i=0;i<numEntries;i++)
 		for (j=0;j<DIMENSION;j++)
@@ -1861,7 +1861,7 @@ float optQuantAnD(
 
 	// normalize direction for output
 
-	q=sqrt(q);
+	q=sqrtf(q);
 	*step=t*q;
 	for (j=0;j<DIMENSION;j++)
 		direction[j]/=q;
@@ -1951,10 +1951,10 @@ float optQuantAnD_d(
 				s /= (float) numEntries;
 				t = t - s * s * (float) numEntries;
 				ASSERT(t !=0);
-				t = (t == 0 ? 0. : 1/t);
+				t = (t == 0 ? 0.0f : 1.0f / t);
 				// We need to requantize
 
-				q = sqrt(q);
+				q = sqrtf(q);
 				t *=q;
 
 				if (q !=0)
@@ -2027,7 +2027,7 @@ float optQuantAnD_d(
 
 	ASSERT(t !=0);
 
-	t = (t == 0 ? 0. : 1/t);
+	t = (t == 0 ? 0.0f : 1.0f / t);
 
 	for (i=0;i<numEntries;i++)
 		for (j=0;j<dimension;j++)
@@ -2035,7 +2035,7 @@ float optQuantAnD_d(
 
 	// normalize direction for output
 
-	q=sqrt(q);
+	q=sqrtf(q);
 	*step=t*q;
 	for (j=0;j<dimension;j++)
 		direction[j]/=q;
