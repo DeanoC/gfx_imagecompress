@@ -8,7 +8,21 @@
 #include "amd_bc6h_body.hpp"
 #include "amd_bc7_body.hpp"
 
-extern void init_ramps (void);
+extern void init_ramps(void);
+
+AL2O3_EXTERN_C void Image_CompressAMDMultiModeLDRBlock(float const input[4 * 4 * 4],
+																							uint8_t modeMask,
+																							bool srcHasAlpha,
+																							float quality,
+																							bool colourRestrict,
+																							bool alphaRestrict,
+																							float performance,
+																							void *out) {
+	BC7BlockEncoder encoder(modeMask, srcHasAlpha, quality, colourRestrict, alphaRestrict, performance);
+
+	encoder.CompressBlock(input, (uint8_t *) out);
+
+}
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader const *src,
 																														 Image_CompressAMDBackendOptions const *amdOptions,
@@ -28,9 +42,6 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader c
 	if (!dst)
 		return nullptr;
 
-	// TODO provide options to user
-	BC7BlockEncoder encoder(amdOptions->ModeMask, srcHasAlpha, 1.0, true, true, 1.0);
-
 	// get block size round up to 4
 	size_t const blocksX = (src->width + 3) / 4;
 	size_t const blocksY = (src->height + 3) / 4;
@@ -40,19 +51,19 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader c
 			for (uint32_t x = 0; x < blocksX; ++x) {
 				uint8_t compressedBlock[16];
 
-				double srcBlock[4 * 4][4];
+				float srcBlock[4 * 4 * 4];
 
-				ImageCompress::ReadNxNBlock(src, 4, 4, !srcHasAlpha,
-																		(double *) srcBlock, x * 4, y * 4, w);
+				ImageCompress::ReadNxNBlockF(src, 4, 4, !srcHasAlpha,
+																		 (float *) srcBlock, x * 4, y * 4, w);
 
-				for(uint32_t i = 0;i < 16;++i) {
-					srcBlock[i][0] *= 255.0;
-					srcBlock[i][1] *= 255.0;
-					srcBlock[i][2] *= 255.0;
-					srcBlock[i][3] *= 255.0;
-				}
-
-				encoder.CompressBlock(srcBlock, compressedBlock);
+				Image_CompressAMDMultiModeLDRBlock(srcBlock,
+																	amdOptions->ModeMask,
+																	srcHasAlpha,
+																	1.0,
+																	true,
+																	true,
+																	1.0,
+																	compressedBlock);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

@@ -32,18 +32,18 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC2(Image_ImageHeader c
 			for (uint32_t x = 0; x < blocksX; ++x) {
 				uint32_t compressedBlock[4];
 
-				float srcBlock[4 * 4 * 4];
-				float weights[3];
+				float rgbBlock[4 * 4 * 3];
+				float alphaBlock[4 * 4];
 
-				ImageCompress::ReadNxNBlock(src, 4, 4,
-																		!srcHasAlpha, srcBlock, x * 4, y * 4, w);
-				ImageCompress::CalculateColourWeightings(srcBlock, weights, amdOptions->AdaptiveColourWeights);
+				ImageCompress::ReadNxNSplitBlockF(src, 4, 4,
+																					!srcHasAlpha, rgbBlock, alphaBlock, x * 4, y * 4, w);
 
-				CompressRGBABlock_ExplicitAlpha(srcBlock,
-												 compressedBlock,
-												 weights,
-												 amdOptions->b3DRefinement,
-												 amdOptions->RefinementSteps);
+				Image_CompressAMDExplictAlphaSingleModeBlock(alphaBlock, compressedBlock);
+				Image_CompressAMDRGBSingleModeBlock(rgbBlock,
+																						amdOptions->AdaptiveColourWeights,
+																						amdOptions->b3DRefinement,
+																						amdOptions->RefinementSteps,
+																						compressedBlock + 2);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

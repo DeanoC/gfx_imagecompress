@@ -1,9 +1,10 @@
 #include "gfx_imagecompress/imagecompress.h"
 #include "block_utils.hpp"
+#include "tiny_imageformat/tinyimageformat_decode.h"
 
 namespace ImageCompress {
 
-void ReadNxNBlock(Image_ImageHeader const *src,
+void ReadNxNBlockF(Image_ImageHeader const *src,
 									uint32_t blockWidth,
 									uint32_t blockHeight,
 									bool forceAlphaTo1,
@@ -12,23 +13,41 @@ void ReadNxNBlock(Image_ImageHeader const *src,
 									uint32_t sy,
 									uint32_t sw) {
 
-	ASSERT(blockWidth*blockHeight < 12*12);
-	double tmp[12*12];
-	ReadNxNBlock(src, blockWidth, blockHeight, forceAlphaTo1, tmp, sx, sy, sw);
+	uint32_t cy = sy;
+	for(uint32_t y = 0; y < blockHeight;++y) {
+		uint32_t cx = sx;
+		if(sy + y >= src->height) cy = src->height-1;
 
-	for(uint32_t i = 0u; i < blockWidth* blockHeight*4;++i) {
-		dst[i] = (float)tmp[i];
+		for(uint32_t x = 0; x < blockWidth;++x) {
+			if(sx + x >= src->width) cx = src->width-1;
+
+			size_t const index = Image_CalculateIndex(src, cx, cy, 0, sw);
+			Image_PixelF pixel;
+			Image_GetPixelAtF(src, (float*)&pixel, index);
+			size_t const dstIndex = ((y*blockWidth) + x) * 4;
+
+			dst[dstIndex + 0] = pixel.r;
+			dst[dstIndex + 1] = pixel.g;
+			dst[dstIndex + 2] = pixel.b;
+			if(forceAlphaTo1) {
+				dst[dstIndex + 3] = 1.0;
+			} else {
+				dst[dstIndex + 3] = pixel.a;
+			}
+			cx++;
+		}
+		cy++;
 	}
 }
 
-void ReadNxNBlock(Image_ImageHeader const *src,
-									uint32_t blockWidth,
-									uint32_t blockHeight,
-									bool forceAlphaTo1,
-									double *dst,
-									uint32_t sx,
-									uint32_t sy,
-									uint32_t sw) {
+void ReadNxNBlockD(Image_ImageHeader const *src,
+									 uint32_t blockWidth,
+									 uint32_t blockHeight,
+									 bool forceAlphaTo1,
+									 double *dst,
+									 uint32_t sx,
+									 uint32_t sy,
+									 uint32_t sw) {
 
 	uint32_t cy = sy;
 	for(uint32_t y = 0; y < blockHeight;++y) {
@@ -57,6 +76,73 @@ void ReadNxNBlock(Image_ImageHeader const *src,
 	}
 }
 
+void ReadNxNSplitBlockF(Image_ImageHeader const *src,
+									 uint32_t blockWidth,
+									 uint32_t blockHeight,
+									 bool forceAlphaTo1,
+									 float *dstRGB,
+									 float *dstA,
+									 uint32_t sx,
+									 uint32_t sy,
+									 uint32_t sw) {
+
+	uint32_t cy = sy;
+	for(uint32_t y = 0; y < blockHeight;++y) {
+		uint32_t cx = sx;
+		if(sy + y >= src->height) cy = src->height-1;
+
+		for(uint32_t x = 0; x < blockWidth;++x) {
+			if(sx + x >= src->width) cx = src->width-1;
+
+			size_t const index = Image_CalculateIndex(src, cx, cy, 0, sw);
+			Image_PixelF pixel;
+			Image_GetPixelAtF(src, (float*)&pixel, index);
+			size_t const dstIndex = (y*blockWidth) + x;
+
+			dstRGB[(dstIndex*3) + 0] = pixel.r;
+			dstRGB[(dstIndex*3) + 1] = pixel.g;
+			dstRGB[(dstIndex*3) + 2] = pixel.b;
+			if(forceAlphaTo1) {
+				dstA[dstIndex] = 1.0;
+			} else {
+				dstA[dstIndex] = pixel.a;
+			}
+			cx++;
+		}
+		cy++;
+	}
+}
+
+void ReadNxNSingleBlockF(Image_ImageHeader const *src,
+												 uint32_t blockWidth,
+												 uint32_t blockHeight,
+												 bool forceAlphaTo1,
+												 float *dst,
+												 uint8_t channel,
+												 uint32_t sx,
+												 uint32_t sy,
+												 uint32_t sw) {
+	uint32_t cy = sy;
+	for(uint32_t y = 0; y < blockHeight;++y) {
+		uint32_t cx = sx;
+		if(sy + y >= src->height) cy = src->height-1;
+
+		for(uint32_t x = 0; x < blockWidth;++x) {
+			if(sx + x >= src->width) cx = src->width-1;
+
+			size_t const index = Image_CalculateIndex(src, cx, cy, 0, sw);
+			float pixel[4];
+			Image_GetPixelAtF(src, pixel, index);
+
+			size_t const dstIndex = (y*blockWidth) + x;
+
+			dst[dstIndex] = pixel[channel];
+			cx++;
+		}
+		cy++;
+	}
+}
+
 void WriteNxNBlock(Image_ImageHeader const *dst,
 									 uint32_t blockWidth,
 									 uint32_t blockHeight,
@@ -73,7 +159,7 @@ void WriteNxNBlock(Image_ImageHeader const *dst,
 	memcpy(dstPtr, blockData, blockByteCount);
 }
 
-void CalculateColourWeightings(float block[4 * 4 * 4], float weights[3], bool adaptive) {
+void CalculateColourWeightings(float const block[4 * 4 * 4], float weights[3], bool adaptive) {
 	static const float baseWeights[3] = {
 			0.3086f,
 			0.6094f,

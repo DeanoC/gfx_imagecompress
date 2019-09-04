@@ -38,7 +38,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC6H(Image_ImageHeader 
 
 				float srcBlock[4 * 4][4];
 
-				ImageCompress::ReadNxNBlock(src, 4, 4,
+				ImageCompress::ReadNxNBlockF(src, 4, 4,
 																		!srcHasAlpha, (float*)srcBlock, x * 4, y * 4, w);
 
 				encoder.CompressBlock(srcBlock, compressedBlock);

@@ -319,7 +319,7 @@ static float ClstrIntnl(float _Blk[MAX_BLOCK][NUM_CHANNELS], uint8_t* _Indxs,
 /*------------------------------------------------------------------------------------------------
 // input ramp is on the coarse grid
 ------------------------------------------------------------------------------------------------*/
-static float ClstrBas(uint8_t* _Indxs, float _Blk[MAX_BLOCK][NUM_CHANNELS],
+static float ClstrBas(uint8_t * _Indxs, float _Blk[MAX_BLOCK][NUM_CHANNELS],
 													 float const _InpRmp[NUM_CHANNELS][NUM_ENDPOINTS], int dwBlockSize, uint8_t dwNumPoints, float const* _pfWeights,
 													 bool _bUseAlpha, uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits)
 {
@@ -339,50 +339,10 @@ static float ClstrBas(uint8_t* _Indxs, float _Blk[MAX_BLOCK][NUM_CHANNELS],
 /*------------------------------------------------------------------------------------------------
 Clusterization the way it looks from the DXTC decompressor
 ------------------------------------------------------------------------------------------------*/
-
-float Clstr(uint32_t block_32[MAX_BLOCK], uint16_t dwBlockSize,
+float Clstr(float const block_32[MAX_BLOCK*4], uint16_t dwBlockSize,
 								 uint8_t nEndpoints[3][NUM_ENDPOINTS],
 								 uint8_t* pcIndices, uint8_t dwNumPoints,
-								 float* _pfWeights, bool _bUseAlpha, uint8_t _nAlphaThreshold,
-								 uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits
-)
-{
-	unsigned int c0 = ConstructColor(nEndpoints[RC][0], nRedBits, nEndpoints[GC][0], nGreenBits, nEndpoints[BC][0], nBlueBits);
-	unsigned int c1 = ConstructColor(nEndpoints[RC][1], nRedBits, nEndpoints[GC][1], nGreenBits, nEndpoints[BC][1], nBlueBits);
-	unsigned int nEndpointIndex0 = 0;
-	unsigned int nEndpointIndex1 = 1;
-	if((!(dwNumPoints & 0x1) && c0 <= c1) || ((dwNumPoints & 0x1) && c0 > c1))
-	{
-		nEndpointIndex0 = 1;
-		nEndpointIndex1 = 0;
-	}
-
-	float InpRmp[NUM_CHANNELS][NUM_ENDPOINTS];
-	InpRmp[RC][0] = (float)nEndpoints[RC][nEndpointIndex0];
-	InpRmp[RC][1] = (float)nEndpoints[RC][nEndpointIndex1];
-	InpRmp[GC][0] = (float)nEndpoints[GC][nEndpointIndex0];
-	InpRmp[GC][1] = (float)nEndpoints[GC][nEndpointIndex1];
-	InpRmp[BC][0] = (float)nEndpoints[BC][nEndpointIndex0];
-	InpRmp[BC][1] = (float)nEndpoints[BC][nEndpointIndex1];
-
-	uint32_t dwAlphaThreshold = _nAlphaThreshold << 24;
-	float Blk[MAX_BLOCK][NUM_CHANNELS];
-	for(int i = 0; i < dwBlockSize; i++)
-	{
-		Blk[i][RC] = (float)((block_32[i] & 0xff0000) >> 16);
-		Blk[i][GC] = (float)((block_32[i] & 0xff00) >> 8);
-		Blk[i][BC] = (float)(block_32[i] & 0xff);
-		if(_bUseAlpha)
-			Blk[i][AC] = ((block_32[i] & 0xff000000) >= dwAlphaThreshold) ? 1.f : 0.f;
-	}
-
-	return ClstrBas(pcIndices, Blk, InpRmp, dwBlockSize, dwNumPoints, _pfWeights, _bUseAlpha, nRedBits, nGreenBits, nBlueBits);
-}
-
-float Clstr(float block_32[MAX_BLOCK*4], uint16_t dwBlockSize,
-								 uint8_t nEndpoints[3][NUM_ENDPOINTS],
-								 uint8_t* pcIndices, uint8_t dwNumPoints,
-								 float* _pfWeights, bool _bUseAlpha, float _fAlphaThreshold,
+								 float const* _pfWeights, bool _bUseAlpha, float _fAlphaThreshold,
 								 uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits)
 {
 	unsigned int c0 = ConstructColor(nEndpoints[RC][0], nRedBits, nEndpoints[GC][0], nGreenBits, nEndpoints[BC][0], nBlueBits);
@@ -418,28 +378,32 @@ float Clstr(float block_32[MAX_BLOCK*4], uint16_t dwBlockSize,
 }
 
 static float Refine(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-												 float _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-												 float _Blk[MAX_BLOCK][NUM_CHANNELS], float _Rpt[MAX_BLOCK],
-												 int _NmrClrs, uint8_t dwNumPoints, float* _pfWeights,
+												 float const _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
+												 float const _Blk[MAX_BLOCK][NUM_CHANNELS],
+												 float const _Rpt[MAX_BLOCK],
+												 int _NmrClrs, uint8_t dwNumPoints,
+												 float const * _pfWeights,
 												 uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits, uint8_t nRefineSteps);
 
 static float Refine3D(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-													 float _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-													 float _Blk[MAX_BLOCK][NUM_CHANNELS], float _Rpt[MAX_BLOCK],
-													 int _NmrClrs, uint8_t dwNumPoints, float* _pfWeights,
+													 float const _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
+													 float const _Blk[MAX_BLOCK][NUM_CHANNELS],
+													 float const _Rpt[MAX_BLOCK],
+													 int _NmrClrs, uint8_t dwNumPoints,
+													 float const * _pfWeights,
 													 uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits, uint8_t nRefineSteps);
 /*------------------------------------------------------------------------------------------------
 1 dim error
 ------------------------------------------------------------------------------------------------*/
-static float RampSrchW(float _Blck[MAX_BLOCK],
-														float _BlckErr[MAX_BLOCK],
-														float _Rpt[MAX_BLOCK],
+static float RampSrchW(float const _Blck[MAX_BLOCK],
+														float const _BlckErr[MAX_BLOCK],
+														float const _Rpt[MAX_BLOCK],
 														float _maxerror, float _min_ex, float _max_ex,
 														int _NmbClrs,
 														int _block)
 {
 	float error = 0;
-	float step = (_max_ex - _min_ex) / (_block - 1);
+	float step = (_max_ex - _min_ex) / (float)(_block - 1);
 	float step_h = step * (float)0.5;
 	float rstep = (float)1.0f / step;
 
@@ -616,9 +580,9 @@ This C version. For more performance, please, take SSE2 route.
 static const float sMvF[] = { 0.f, -1.f, 1.f, -2.f, 2.f, -3.f, 3.f, -4.f, 4.f, -5.f, 5.f, -6.f, 6.f, -7.f, 7.f, -8.f, 8.f};
 
 float Refine(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-									float _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-									float _Blk[MAX_BLOCK][NUM_CHANNELS], float _Rpt[MAX_BLOCK],
-									int _NmrClrs, uint8_t dwNumPoints, float* _pfWeights,
+									float const _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
+									float const _Blk[MAX_BLOCK][NUM_CHANNELS], float const _Rpt[MAX_BLOCK],
+									int _NmrClrs, uint8_t dwNumPoints, float const* _pfWeights,
 									uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits, uint8_t nRefineSteps)
 {
 	ALIGN_16(float) Rmp[NUM_CHANNELS][MAX_POINTS];
@@ -842,9 +806,9 @@ float Refine(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 }
 
 float Refine3D(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-										float _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-										float _Blk[MAX_BLOCK][NUM_CHANNELS], float _Rpt[MAX_BLOCK],
-										int _NmrClrs, uint8_t dwNumPoints, float* _pfWeights,
+										float const _InpRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
+										float const _Blk[MAX_BLOCK][NUM_CHANNELS], float const _Rpt[MAX_BLOCK],
+										int _NmrClrs, uint8_t dwNumPoints, float const * _pfWeights,
 										uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits, uint8_t nRefineSteps)
 {
 	ALIGN_16(float) Rmp[NUM_CHANNELS][MAX_POINTS];
@@ -967,16 +931,15 @@ float Refine3D(float _OutRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 	return bestE;
 }
 
-
 //    This is a float point-based compression
 //    it assumes that the number of unique colors is already known; input is in [0., 255.] range.
 //    This is C version.
 static void CompressRGBBlockX(float _RsltRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
-															float _BlkIn[MAX_BLOCK][NUM_CHANNELS],
+															float const _BlkIn[MAX_BLOCK][NUM_CHANNELS],
 															float _Rpt[MAX_BLOCK],
 															int _UniqClrs,
 															uint8_t dwNumPoints, bool b3DRefinement, uint8_t nRefinementSteps,
-															float* _pfWeights,
+															float const * _pfWeights,
 															uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits)
 {
 	ALIGN_16(float) Prj0[MAX_BLOCK];
@@ -1243,10 +1206,10 @@ static void CompressRGBBlockX(float _RsltRmpPnts[NUM_CHANNELS][NUM_ENDPOINTS],
 
 --------------------------------------------------------------------------------------------------------*/
 
-float CompRGBBlock(float* block_32, uint16_t dwBlockSize,
+float CompRGBABlock(float const* block_32, uint16_t dwBlockSize,
 												uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits,
 												uint8_t nEndpoints[3][NUM_ENDPOINTS], uint8_t* pcIndices, uint8_t dwNumPoints,
-												bool b3DRefinement, uint8_t nRefinementSteps, float* _pfChannelWeights,
+												bool b3DRefinement, uint8_t nRefinementSteps, float const* _pfChannelWeights,
 												bool _bUseAlpha, float _fAlphaThreshold)
 {
 	ALIGN_16(float) Rpt[MAX_BLOCK];
@@ -1257,15 +1220,15 @@ float CompRGBBlock(float* block_32, uint16_t dwBlockSize,
 
 	uint32_t dwColors = 0;
 	float fBlk[BLOCK_SIZE*4];
-	for(uint32_t i = 0; i < dwBlockSize; i++)
-		if(!_bUseAlpha || (block_32[(i* 4) + 3] >= _fAlphaThreshold))
-		{
-			fBlk[(dwColors* 4) + 0] = block_32[(i*4) + 2];
-			fBlk[(dwColors* 4) + 1] = block_32[(i*4) + 1];
-			fBlk[(dwColors* 4) + 2] = block_32[(i*4) + 0];
-			fBlk[(dwColors* 4) + 3] = 0.f;
+	for(uint32_t i = 0; i < dwBlockSize; i++) {
+		if (!_bUseAlpha || (block_32[(i * 4) + 3] >= _fAlphaThreshold)) {
+			fBlk[(dwColors * 4) + 0] = block_32[(i * 4) + 2];
+			fBlk[(dwColors * 4) + 1] = block_32[(i * 4) + 1];
+			fBlk[(dwColors * 4) + 2] = block_32[(i * 4) + 0];
+			fBlk[(dwColors * 4) + 3] = 0.f;
 			dwColors++;
 		}
+	}
 
 	// Do we have any colors ?
 	if(dwColors)
@@ -1295,6 +1258,7 @@ float CompRGBBlock(float* block_32, uint16_t dwBlockSize,
 			else
 				Rpt[dwUniqueColors] += 1.f;
 		}
+
 		dwUniqueColors++;
 
 		// switch to float
@@ -1332,87 +1296,69 @@ float CompRGBBlock(float* block_32, uint16_t dwBlockSize,
 	}
 }
 
-/*--------------------------------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------------------------------*/
-
-float CompRGBBlock(uint32_t* block_32, uint16_t dwBlockSize,
-												uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits,
-												uint8_t nEndpoints[3][NUM_ENDPOINTS], uint8_t* pcIndices, uint8_t dwNumPoints,
-												bool _bUseSSE2, bool b3DRefinement, uint8_t nRefinementSteps, float* _pfChannelWeights,
-												bool _bUseAlpha, uint8_t _nAlphaThreshold)
+float CompRGBBlock(float const* block_32, uint16_t dwBlockSize,
+										uint8_t nRedBits, uint8_t nGreenBits, uint8_t nBlueBits,
+										uint8_t nEndpoints[3][NUM_ENDPOINTS], uint8_t* pcIndices, uint8_t dwNumPoints,
+										bool b3DRefinement, uint8_t nRefinementSteps, float const* _pfChannelWeights )
 {
-	ALIGN_16(float) Rpt[BLOCK_SIZE];
-	ALIGN_16(float) BlkIn[BLOCK_SIZE][NUM_CHANNELS];
+	ALIGN_16(float) Rpt[MAX_BLOCK];
+	ALIGN_16(float) BlkIn[MAX_BLOCK][NUM_CHANNELS];
 
-	memset(Rpt, 0, sizeof(Rpt));
 	memset(BlkIn, 0, sizeof(BlkIn));
 
-	uint32_t dwAlphaThreshold = _nAlphaThreshold << 24;
-	uint32_t dwColors = 0;
-	uint32_t dwBlk[BLOCK_SIZE];
+	float fBlk[4*4*3];
+	memcpy(fBlk, block_32, sizeof(float) * 4 * 4 * 3);
+
+	//  Here we are computing an uniq number of colors.
+	//  For each uniq value we compute the number of it appearences.
+	qsort((void *)fBlk, 4 * 4, 3 * sizeof(float), QSortFloatCmp);
+
+	uint32_t dwUniqueColors = 0;
+	memcpy(&BlkIn[0], &fBlk[0], 3 * sizeof(float));
+	BlkIn[0][3] = 1.0f;
+
+	float new_p[3];
+	memcpy(&new_p, &fBlk[0], 3 * sizeof(float));
+
+	Rpt[dwUniqueColors] = 1.f;
+	for(uint32_t i = 1; i < 16; i++) {
+		if (memcmp(&new_p, &fBlk[i * 3], 3 * sizeof(float)) != 0) {
+			dwUniqueColors++;
+
+			memcpy(&BlkIn[dwUniqueColors], &fBlk[i * 3], 3 * sizeof(float));
+			BlkIn[dwUniqueColors][3] = 1.0f;
+			memcpy(&new_p, &fBlk[i * 3], 3 * sizeof(float));
+
+			Rpt[dwUniqueColors] = 1.f;
+		} else {
+			Rpt[dwUniqueColors] += 1.f;
+		}
+	}
+	dwUniqueColors++;
+
+	// switch to float
+	for(uint32_t i=0; i < dwUniqueColors; i++)
+		for(uint32_t j=0; j < 4; j++)
+			BlkIn[i][j] *= 255.0;
+
+	float rsltC[NUM_CHANNELS][NUM_ENDPOINTS];
+	CompressRGBBlockX(rsltC, BlkIn, Rpt, dwUniqueColors, dwNumPoints, b3DRefinement, nRefinementSteps,
+										_pfChannelWeights, nRedBits, nGreenBits, nBlueBits);
+
+	// return to integer realm
+	for(int i = 0; i < 3; i++)
+		for(int j = 0; j < 2; j++)
+			nEndpoints[i][j] =  (uint8_t)rsltC[i][j];
+
 	for(uint32_t i = 0; i < dwBlockSize; i++)
-		if(!_bUseAlpha || (block_32[i] & 0xff000000) >= dwAlphaThreshold)
-			dwBlk[dwColors++] = block_32[i] | 0xff000000;
-
-	// Do we have any colors ?
-	if(dwColors)
 	{
-		bool bHasAlpha = (dwColors != dwBlockSize);
-		if(bHasAlpha && _bUseAlpha && !(dwNumPoints & 0x1))
-			return FLT_MAX;
-
-		// Here we are computing an unique number of colors.
-		// For each unique value we compute the number of it appearences.
-		qsort((void *)dwBlk, (size_t)dwColors, sizeof(uint32_t), QSortIntCmp);
-
-		uint32_t new_p;
-		uint32_t dwBlkU[BLOCK_SIZE];
-		uint32_t dwUniqueColors = 0;
-		new_p = dwBlkU[0] = dwBlk[0];
-		Rpt[dwUniqueColors] = 1.f;
-		for(uint32_t i = 1; i < dwColors; i++)
-		{
-			if(new_p != dwBlk[i])
-			{
-				dwUniqueColors++;
-				new_p = dwBlkU[dwUniqueColors] = dwBlk[i];
-				Rpt[dwUniqueColors] = 1.f;
-			}
-			else
-				Rpt[dwUniqueColors] += 1.f;
-		}
-		dwUniqueColors++;
-
-		// switch to float
-		for(uint32_t i=0; i<dwUniqueColors; i++)
-		{
-			BlkIn[i][RC] = (float)((dwBlkU[i] >> 16) & 0xff); // R
-			BlkIn[i][GC] = (float)((dwBlkU[i] >> 8)  & 0xff); // G
-			BlkIn[i][BC] = (float)((dwBlkU[i] >> 0)  & 0xff); // B
-			BlkIn[i][AC] =  255.f; // A
-		}
-
-		float rsltC[NUM_CHANNELS][NUM_ENDPOINTS];
-		CompressRGBBlockX(rsltC, BlkIn, Rpt, dwUniqueColors, dwNumPoints, b3DRefinement, nRefinementSteps,
-											_pfChannelWeights, nRedBits, nGreenBits, nBlueBits);
-
-		// return to integer realm
-		for(int i = 0; i < 3; i++)
-			for(int j = 0; j < 2; j++)
-				nEndpoints[i][j] =  (uint8_t)rsltC[i][j];
-
-		return Clstr(block_32, dwBlockSize, nEndpoints, pcIndices, dwNumPoints, _pfChannelWeights, _bUseAlpha,
-								 _nAlphaThreshold, nRedBits, nGreenBits, nBlueBits);
+		fBlk[(i* 4) + 0] = block_32[(i*4) + 2] * 255.0f;
+		fBlk[(i* 4) + 1] = block_32[(i*4) + 1] * 255.0f;
+		fBlk[(i* 4) + 2] = block_32[(i*4) + 0] * 255.0f;
 	}
-	else
-	{
-		// All colors transparent
-		nEndpoints[0][0] = nEndpoints[1][0] = nEndpoints[2][0] = 0;
-		nEndpoints[0][1] = nEndpoints[1][1] = nEndpoints[2][1] = 0xff;
-		memset(pcIndices, 0xff, dwBlockSize);
-		return 0.0;
-	}
+
+	return Clstr(fBlk, dwBlockSize, nEndpoints, pcIndices, dwNumPoints, _pfChannelWeights, false, 0.0f,
+							 nRedBits, nGreenBits, nBlueBits);
 }
 
 /*----------------------------------------------------------------------------
@@ -1424,7 +1370,7 @@ SCALAR CASE
 ---------------------------------------------------------------------------*/
 
 static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS],
-														 float _Blk[MAX_BLOCK], int _Nmbr,
+														 float const _Blk[MAX_BLOCK], int _Nmbr,
 														 uint8_t dwNumPoints, bool bFixedRampPoints,
 														 int _IntPrc = 8,
 														 int _FracPrc = 0,
@@ -1433,8 +1379,8 @@ static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS],
 );
 
 static  float   Clstr1(uint8_t* pcIndices,
-														float _blockIn[MAX_BLOCK],
-														float _ramp[NUM_ENDPOINTS],
+														float const _blockIn[MAX_BLOCK],
+														float const _ramp[NUM_ENDPOINTS],
 														int _NmbrClrs,
 														int nNumPoints,
 														bool bFixedRampPoints,
@@ -1503,7 +1449,7 @@ static void GetRmp1(float _rampDat[MAX_POINTS], float _ramp[NUM_ENDPOINTS], int 
 /*--------------------------------------------------------------------------------------------
 
 ---------------------------------------------------------------------------------------------*/
-static float Clstr1(uint8_t* pcIndices, float _blockIn[MAX_BLOCK], float _ramp[NUM_ENDPOINTS],
+static float Clstr1(uint8_t* pcIndices, float const _blockIn[MAX_BLOCK], float _ramp[NUM_ENDPOINTS],
 												 int _NmbrClrs, int nNumPoints, bool bFixedRampPoints, int _intPrec, int _fracPrec, bool _bFixedRamp)
 {
 	float Err = 0.f;
@@ -1684,7 +1630,7 @@ static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS], [OUT] Min amd Max value o
 */
 #define _INT_GRID (_bFixedRamp && _FracPrc == 0)
 
-static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS], float _Blk[MAX_BLOCK], int _Nmbr,
+static float CompBlock1(float _RmpPnts[NUM_ENDPOINTS], float const _Blk[MAX_BLOCK], int _Nmbr,
 														 uint8_t dwNumPoints, bool bFixedRampPoints,
 														 int _IntPrc, int _FracPrc, bool _bFixedRamp, bool _bUseSSE2)
 {
@@ -1899,7 +1845,7 @@ void CompBlock1X(float* _Blk, [IN] scalar data block (alphas or normals) in floa
                )
 ---------------------------------------------------------------------------------------------*/
 
-float CompBlock1X(float* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint8_t* pcIndices,
+float CompBlock1X(float const* _Blk, uint16_t dwBlockSize, uint8_t nEndpoints[2], uint8_t* pcIndices,
 											 uint8_t dwNumPoints, bool bFixedRampPoints, int _intPrec, int _fracPrec, bool _bFixedRamp)
 {
 	// just to make them initialized

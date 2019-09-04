@@ -29,17 +29,12 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC4(Image_ImageHeader c
 			for (uint32_t x = 0; x < blocksX; ++x) {
 				uint32_t compressedBlock[2];
 
-				float srcBlock[4 * 4 * 4];
-
-				ImageCompress::ReadNxNBlock(src, 4, 4,
-																		!srcHasAlpha, srcBlock, x * 4, y * 4, w);
-				// extract just the red
 				float redBlock[4 * 4];
-				for (uint32_t i = 0; i < 16; i++) {
-					redBlock[i] = srcBlock[(i * 4) + 0];
-				}
 
-				CompressAlphaBlock(redBlock, compressedBlock);
+				ImageCompress::ReadNxNSingleBlockF(src, 4, 4,
+																		!srcHasAlpha, redBlock, 1, x * 4, y * 4, w);
+
+				Image_CompressAMDAlphaSingleModeBlock(redBlock, compressedBlock);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

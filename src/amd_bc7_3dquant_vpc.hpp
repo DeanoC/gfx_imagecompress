@@ -26,27 +26,27 @@
 
 #include "amd_bc7_partitions.hpp"
 typedef struct {
-	double d;
+	float d;
 	int i;
 } a;
 
-void sortProjection(double projection[MAX_ENTRIES], int order[MAX_ENTRIES], int numEntries);
-void covariance(double data[][DIMENSION], int numEntries, double cov[DIMENSION][DIMENSION]);
-void centerInPlace(double data[][DIMENSION], int numEntries, double mean[DIMENSION]);
-void project(double data[][DIMENSION], int numEntries, double vector[DIMENSION], double projection[MAX_ENTRIES]);
-void sortProjection(double projection[MAX_ENTRIES], int order[MAX_ENTRIES], int numEntries);
-void eigenVector(double cov[DIMENSION][DIMENSION], double vector[DIMENSION]);
-double partition2 (double data[][DIMENSION], int numEntries,int index[]);
+void sortProjection(float projection[MAX_ENTRIES], int order[MAX_ENTRIES], int numEntries);
+void covariance(float data[][DIMENSION], int numEntries, float cov[DIMENSION][DIMENSION]);
+void centerInPlace(float data[][DIMENSION], int numEntries, float mean[DIMENSION]);
+void project(float data[][DIMENSION], int numEntries, float vector[DIMENSION], float projection[MAX_ENTRIES]);
+void sortProjection(float projection[MAX_ENTRIES], int order[MAX_ENTRIES], int numEntries);
+void eigenVector(float cov[DIMENSION][DIMENSION], float vector[DIMENSION]);
+float partition2 (float data[][DIMENSION], int numEntries,int index[]);
 
-double optQuantEven(
-		double data[MAX_ENTRIES][DIMENSION],
+float optQuantEven(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 ) ;
 
-double totalError(double data[MAX_ENTRIES][DIMENSION],double data2[MAX_ENTRIES][DIMENSION],int numEntries);
-double totalError_d(double data[MAX_ENTRIES][MAX_DIMENSION_BIG],double data2[MAX_ENTRIES][MAX_DIMENSION_BIG],int numEntries, int dimension);
+float totalError(float data[MAX_ENTRIES][DIMENSION],float data2[MAX_ENTRIES][DIMENSION],int numEntries);
+float totalError(float data[MAX_ENTRIES][MAX_DIMENSION_BIG],float data2[MAX_ENTRIES][MAX_DIMENSION_BIG],int numEntries, int dimension);
 
 /****************************************************/
 /****************************************************/
@@ -56,24 +56,24 @@ double totalError_d(double data[MAX_ENTRIES][MAX_DIMENSION_BIG],double data2[MAX
 //
 //    returns resulting error
 //
-double optQuantTrace(
-		double data[MAX_ENTRIES][DIMENSION],    // input data
+float optQuantTrace(
+		float data[MAX_ENTRIES][DIMENSION],    // input data
 		int numEntries,                            // number of input points above (not clear about 1, better to avoid)
 		int numClusters,                        // number of clusters on the ramp, max 8 (not clear about 1, better to avoid)
 		int index[MAX_ENTRIES],                    // output index, if not all points of the ramp used, 0 may not be assigned
-		double out[MAX_ENTRIES][DIMENSION],        // resulting quantization
-		double direction [DIMENSION],            // direction vector of the ramp (check normalization)
-		double *step                            // step size (check normalization)
+		float out[MAX_ENTRIES][DIMENSION],        // resulting quantization
+		float direction [DIMENSION],            // direction vector of the ramp (check normalization)
+		float *step                            // step size (check normalization)
 );
 
-double optQuantTrace_d(
-		double data[MAX_ENTRIES][MAX_DIMENSION_BIG],    // input data
+float optQuantTrace_d(
+		float data[MAX_ENTRIES][MAX_DIMENSION_BIG],    // input data
 		int numEntries,                            // number of input points above (not clear about 1, better to avoid)
 		int numClusters,                        // number of clusters on the ramp, max 8 (not clear about 1, better to avoid)
 		int index[MAX_ENTRIES],                    // output index, if not all points of the ramp used, 0 may not be assigned
-		double out[MAX_ENTRIES][MAX_DIMENSION_BIG],        // resulting quantization
-		double direction [MAX_DIMENSION_BIG],            // direction vector of the ramp (check normalization)
-		double *step,                            // step size (check normalization)
+		float out[MAX_ENTRIES][MAX_DIMENSION_BIG],        // resulting quantization
+		float direction [MAX_DIMENSION_BIG],            // direction vector of the ramp (check normalization)
+		float *step,                            // step size (check normalization)
 		int dimension);
 
 /****************************************************/
@@ -83,52 +83,52 @@ double optQuantTrace_d(
 //
 //    ping-pong style  KATC type (but for RGB x 2)  trace (with fallback to quantAnD (?) driven "continius" quantizer
 //
-double optQuant2Trace(
-		double data[MAX_ENTRIES][DIMENSION],
+float optQuant2Trace(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index_[MAX_ENTRIES],
-		double out_[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out_[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 );
 
 void printStep (void);
 
 /********************************************/
 // continious quantizer for 16 clusters, could use bette testing
-double optQuantAnD(
-		double data[MAX_ENTRIES][DIMENSION],  // 0-255
+float optQuantAnD(
+		float data[MAX_ENTRIES][DIMENSION],  // 0-255
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 );
 
 
-double optQuantAnD_d(
-		double data[MAX_ENTRIES][MAX_DIMENSION_BIG],  // 0-255
+float optQuantAnD_d(
+		float data[MAX_ENTRIES][MAX_DIMENSION_BIG],  // 0-255
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][MAX_DIMENSION_BIG],
-		double direction [MAX_DIMENSION_BIG],double *step,
+		float out[MAX_ENTRIES][MAX_DIMENSION_BIG],
+		float direction [MAX_DIMENSION_BIG],float *step,
 		int dimension
 );
 
 /********************************************/
 
 
-double superQuantAnD(
-		double data[MAX_ENTRIES][DIMENSION],
+float superQuantAnD(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 );
 
 int reconstructGetDirConstr (
-		double data[MAX_ENTRIES][DIMENSION],
-		double mean[DIMENSION],
+		float data[MAX_ENTRIES][DIMENSION],
+		float mean[DIMENSION],
 		int numEntries,
 		int numClusters,
 		int index[MAX_ENTRIES],
-		double direction [DIMENSION],
-		double *step,
-		double *idxmean,
+		float direction [DIMENSION],
+		float *step,
+		float *idxmean,
 		int clump
 );
 

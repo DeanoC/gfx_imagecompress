@@ -3,22 +3,22 @@
 
 
 #include "al2o3_platform/platform.h"
-#include "al2o3_cmath/scalar.h"
 #include "gfx_image/image.hpp"
 #include "gfx_imagecompress/imagecompress.h"
-#include "gfx_image/utils.h"
-#include "amd_bcx_body.hpp"
 #include "block_utils.hpp"
 #include "amd_bcx_helpers.hpp"
+
+
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC1(Image_ImageHeader const *src,
 																														 Image_CompressAMDBackendOptions const *amdOptions,
 																														 Image_CompressBC1Options const *options,
 																														 Image_CompressProgressFunc progressCallback,
 																														 void *userCallbackData) {
-	if (src->depth > 1) return nullptr;
+	if (src->depth > 1)
+		return nullptr;
 
-	amdOptions = (amdOptions == nullptr)? Image_CompressDefaultAmdOptions() : amdOptions;
+	amdOptions = (amdOptions == nullptr) ? Image_CompressDefaultAmdOptions() : amdOptions;
 
 	if (options == nullptr) {
 		static Image_CompressBC1Options const defaultOptions{
@@ -33,10 +33,11 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC1(Image_ImageHeader c
 	bool const srcHasAlpha = TinyImageFormat_ChannelCount(src->format) > 3;
 
 	TinyImageFormat dstFmt = sRGB ?
-											 dstHasAlpha ? TinyImageFormat_DXBC1_RGBA_SRGB : TinyImageFormat_DXBC1_RGB_UNORM :
-											 dstHasAlpha ? TinyImageFormat_DXBC1_RGBA_UNORM : TinyImageFormat_DXBC1_RGB_UNORM;
+													 dstHasAlpha ? TinyImageFormat_DXBC1_RGBA_SRGB : TinyImageFormat_DXBC1_RGB_UNORM :
+													 dstHasAlpha ? TinyImageFormat_DXBC1_RGBA_UNORM : TinyImageFormat_DXBC1_RGB_UNORM;
 	Image_ImageHeader const *dst = Image_CreateNoClear(src->width, src->height, 1, src->slices, dstFmt);
-	if (!dst) return nullptr;
+	if (!dst)
+		return nullptr;
 
 	// get block size round up to 4
 	size_t const blocksX = (src->width + 3) / 4;
@@ -48,19 +49,15 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC1(Image_ImageHeader c
 				uint32_t compressedBlock[2];
 
 				float srcBlock[4 * 4 * 4];
-				float weights[3];
-
-				ImageCompress::ReadNxNBlock(src, 4, 4,
+				ImageCompress::ReadNxNBlockF(src, 4, 4,
 																		!srcHasAlpha, srcBlock, x * 4, y * 4, w);
-				ImageCompress::CalculateColourWeightings(srcBlock, weights, amdOptions->AdaptiveColourWeights);
 
-				CompressRGBBlockBC1(srcBlock,
-												 compressedBlock,
-												 weights,
-												 amdOptions->b3DRefinement,
-												 amdOptions->RefinementSteps,
-												 options->UseAlpha,
-												 options->AlphaThreshold / 255.0f);
+				Image_CompressAMDBC1Block(srcBlock,
+														amdOptions->AdaptiveColourWeights,
+														amdOptions->b3DRefinement,
+														amdOptions->RefinementSteps,
+														options->AlphaThreshold / 255.0f,
+														compressedBlock);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

@@ -37,7 +37,7 @@
 struct TRACE
 {
 	int  k;
-	double d;
+	float d;
 };
 
 static int trcnts[MAX_CLUSTERS][MAX_ENTRIES_QUANT_TRACE];
@@ -135,7 +135,7 @@ inline int a_compare( const void *arg1, const void *arg2 )
 //
 // We ignore the issue of ordering equal elements here, though it can affect results abit
 //
-void sortProjection(double projection[MAX_ENTRIES], int order[MAX_ENTRIES], int numEntries)
+void sortProjection(float projection[MAX_ENTRIES], int order[MAX_ENTRIES], int numEntries)
 {
 	int i;
 	a what[MAX_ENTRIES+MAX_PARTITIONS_TABLE];
@@ -149,7 +149,7 @@ void sortProjection(double projection[MAX_ENTRIES], int order[MAX_ENTRIES], int 
 		order[i]=what[i].i;
 };
 
-void covariance(double data[][DIMENSION], int numEntries, double cov[DIMENSION][DIMENSION])
+void covariance(float data[][DIMENSION], int numEntries, float cov[DIMENSION][DIMENSION])
 {
 	int i,j,k;
 
@@ -165,7 +165,7 @@ void covariance(double data[][DIMENSION], int numEntries, double cov[DIMENSION][
 			cov[i][j] = cov[j][i];
 }
 
-void covariance_d(double data[][MAX_DIMENSION_BIG], int numEntries, double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], int dimension)
+void covariance_d(float data[][MAX_DIMENSION_BIG], int numEntries, float cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], int dimension)
 {
 	int i,j,k;
 
@@ -182,7 +182,7 @@ void covariance_d(double data[][MAX_DIMENSION_BIG], int numEntries, double cov[M
 			cov[i][j] = cov[j][i];
 }
 
-void centerInPlace(double data[][DIMENSION], int numEntries, double mean[DIMENSION])
+void centerInPlace(float data[][DIMENSION], int numEntries, float mean[DIMENSION])
 {
 	int i,k;
 
@@ -196,13 +196,13 @@ void centerInPlace(double data[][DIMENSION], int numEntries, double mean[DIMENSI
 		return;
 
 	for(i=0;i<DIMENSION;i++) {
-		mean[i]/=(double) numEntries;
+		mean[i]/=(float) numEntries;
 		for(k=0;k<numEntries;k++)
 			data[k][i]-=mean[i];
 	}
 }
 
-void centerInPlace_d(double data[][MAX_DIMENSION_BIG], int numEntries, double mean[MAX_DIMENSION_BIG], int dimension)
+void centerInPlace_d(float data[][MAX_DIMENSION_BIG], int numEntries, float mean[MAX_DIMENSION_BIG], int dimension)
 {
 	int i,k;
 
@@ -218,13 +218,13 @@ void centerInPlace_d(double data[][MAX_DIMENSION_BIG], int numEntries, double me
 
 	for(i=0;i<dimension;i++)
 	{
-		mean[i]/=(double) numEntries;
+		mean[i]/=(float) numEntries;
 		for(k=0;k<numEntries;k++)
 			data[k][i]-=mean[i];
 	}
 }
 
-void project(double data[][DIMENSION], int numEntries, double vector[DIMENSION], double projection[MAX_ENTRIES])
+void project(float data[][DIMENSION], int numEntries, float vector[DIMENSION], float projection[MAX_ENTRIES])
 {
 	// assume that vector is normalized already
 	int i,k;
@@ -237,7 +237,7 @@ void project(double data[][DIMENSION], int numEntries, double vector[DIMENSION],
 	}
 }
 
-void project_d(double data[][MAX_DIMENSION_BIG], int numEntries, double vector[MAX_DIMENSION_BIG], double projection[MAX_ENTRIES], int dimension)
+void project_d(float data[][MAX_DIMENSION_BIG], int numEntries, float vector[MAX_DIMENSION_BIG], float projection[MAX_ENTRIES], int dimension)
 {
 	// assume that vector is normalized already
 	int i,k;
@@ -252,7 +252,7 @@ void project_d(double data[][MAX_DIMENSION_BIG], int numEntries, double vector[M
 	}
 }
 
-void eigenVector(double cov[DIMENSION][DIMENSION], double vector[DIMENSION])
+void eigenVector(float cov[DIMENSION][DIMENSION], float vector[DIMENSION])
 {
 	// calculate an eigenvecto corresponding to a biggest eigenvalue
 	// will work for non-zero non-negative matricies only
@@ -262,14 +262,14 @@ void eigenVector(double cov[DIMENSION][DIMENSION], double vector[DIMENSION])
 
 
 	int i,j,k,l, m, n,p,q;
-	double c[2][DIMENSION][DIMENSION];
-	double maxDiag;
+	float c[2][DIMENSION][DIMENSION];
+	float maxDiag;
 
 	for(i=0;i<DIMENSION;i++)
 		for(j=0;j<DIMENSION;j++)
 			c[0][i][j] =cov[i][j];
 
-	p = (int) floor(log( (DBL_MAX_EXP - EV_SLACK) / ceil (log((double)DIMENSION)/log(2.)) )/log(2.));
+	p = (int) floor(log( (DBL_MAX_EXP - EV_SLACK) / ceil (log((float)DIMENSION)/log(2.)) )/log(2.));
 
 	ASSERT(p>0);
 
@@ -315,7 +315,7 @@ void eigenVector(double cov[DIMENSION][DIMENSION], double vector[DIMENSION])
 		k = c[l][i][i] > maxDiag ? i : k;
 		maxDiag = c[l][i][i] > maxDiag ? c[l][i][i] : maxDiag;
 	}
-	double t;
+	float t;
 	t=0;
 	for(i=0;i<DIMENSION;i++) {
 		t+=c[l][k][i]*c[l][k][i];
@@ -333,7 +333,7 @@ void eigenVector(double cov[DIMENSION][DIMENSION], double vector[DIMENSION])
 		vector[i]/=t;
 }
 
-void eigenVector_d(double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], double vector[MAX_DIMENSION_BIG], int dimension)
+void eigenVector_d(float cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], float vector[MAX_DIMENSION_BIG], int dimension)
 {
 	// calculate an eigenvecto corresponding to a biggest eigenvalue
 	// will work for non-zero non-negative matricies only
@@ -343,14 +343,14 @@ void eigenVector_d(double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], double vect
 
 
 	int i,j,k,l, m, n,p,q;
-	double c[2][MAX_DIMENSION_BIG][MAX_DIMENSION_BIG];
-	double maxDiag;
+	float c[2][MAX_DIMENSION_BIG][MAX_DIMENSION_BIG];
+	float maxDiag;
 
 	for(i=0;i<dimension;i++)
 		for(j=0;j<dimension;j++)
 			c[0][i][j] =cov[i][j];
 
-	p = (int) floor(log( (DBL_MAX_EXP - EV_SLACK) / ceil (log((double)dimension)/log(2.)) )/log(2.));
+	p = (int) floor(log( (DBL_MAX_EXP - EV_SLACK) / ceil (log((float)dimension)/log(2.)) )/log(2.));
 
 	ASSERT(p>0);
 
@@ -380,7 +380,7 @@ void eigenVector_d(double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], double vect
 		for(m=0;m<p;m++) {
 			for(i=0;i<dimension;i++)
 				for(j=0;j<dimension;j++) {
-					double temp=0;
+					float temp=0;
 					for(k=0;k<dimension;k++)
 					{
 						// Notes:
@@ -401,7 +401,7 @@ void eigenVector_d(double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], double vect
 		k = c[l][i][i] > maxDiag ? i : k;
 		maxDiag = c[l][i][i] > maxDiag ? c[l][i][i] : maxDiag;
 	}
-	double t;
+	float t;
 	t=0;
 	for(i=0;i<dimension;i++)
 	{
@@ -419,14 +419,14 @@ void eigenVector_d(double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG], double vect
 		vector[i]/=t;
 }
 
-double partition2(double data[][DIMENSION], int numEntries,int index[])
+float partition2(float data[][DIMENSION], int numEntries,int index[])
 {
 	int i,j,k;
-	double cov[2][DIMENSION][DIMENSION];
-	double center[2][DIMENSION];
-	double cnt[2] ={0,0};
-	double vector[2][DIMENSION];
-	double acc=0;
+	float cov[2][DIMENSION][DIMENSION];
+	float center[2][DIMENSION];
+	float cnt[2] ={0,0};
+	float vector[2][DIMENSION];
+	float acc=0;
 
 	for(k=0;k<numEntries;k++)
 		cnt[index[k]]++;
@@ -450,7 +450,7 @@ double partition2(double data[][DIMENSION], int numEntries,int index[])
 		for(j=0;j<=i;j++)
 			for (k=0;k<2;k++)
 				if (cnt[k]!=0)
-					cov[k][i][j] -=center[k][i]*center[k][j]/(double)cnt[k];
+					cov[k][i][j] -=center[k][i]*center[k][j]/(float)cnt[k];
 
 
 	for(i=0;i<DIMENSION;i++)
@@ -476,7 +476,7 @@ double partition2(double data[][DIMENSION], int numEntries,int index[])
 	return(acc);
 }
 
-void quantEven(double data[MAX_ENTRIES][DIMENSION],int numEntries, int numClusters, int index[MAX_ENTRIES])
+void quantEven(float data[MAX_ENTRIES][DIMENSION],int numEntries, int numClusters, int index[MAX_ENTRIES])
 {
 	// Data should be centered, otherwise will not work
 	// The running time (number of iteration of the external loop) is
@@ -487,7 +487,7 @@ void quantEven(double data[MAX_ENTRIES][DIMENSION],int numEntries, int numCluste
 
 	int level;
 
-	double t,s;
+	float t,s;
 	int c =1;
 
 	int cluster[MAX_CLUSTERS];
@@ -496,17 +496,17 @@ void quantEven(double data[MAX_ENTRIES][DIMENSION],int numEntries, int numCluste
 	// stores the las index for the cluster
 
 
-	double  dpAcc       [MAX_CLUSTERS][DIMENSION];
-	double  index2Acc   [MAX_CLUSTERS];     // for backtraking
-	double  indexAcc    [MAX_CLUSTERS];
+	float  dpAcc       [MAX_CLUSTERS][DIMENSION];
+	float  index2Acc   [MAX_CLUSTERS];     // for backtraking
+	float  indexAcc    [MAX_CLUSTERS];
 
-	double dRamp2[MAX_CLUSTERS];    // first differenses of the (shifted) ramp squared
+	float dRamp2[MAX_CLUSTERS];    // first differenses of the (shifted) ramp squared
 
-	double S;
+	float S;
 
-	double nErrorNum=0;   // not the actual error, but some (decreasing) linear functional of it represented
+	float nErrorNum=0;   // not the actual error, but some (decreasing) linear functional of it represented
 	// as numerator and denominator
-	double nErrorDen=1;
+	float nErrorDen=1;
 
 	level=1;
 
@@ -518,7 +518,7 @@ void quantEven(double data[MAX_ENTRIES][DIMENSION],int numEntries, int numCluste
 	for(i=0;i<DIMENSION;i++)
 		dpAcc[0][i]=dpAcc[1][i]=0;
 
-	S =  1/sqrt((double) numEntries);
+	S =  1/sqrt((float) numEntries);
 
 	for(i=1;i<MAX_CLUSTERS;i++) {
 		dRamp2[i] = 2*i-1;
@@ -574,7 +574,7 @@ void quantEven(double data[MAX_ENTRIES][DIMENSION],int numEntries, int numCluste
 	}
 }
 
-void quantLineConstr(double data[][DIMENSION], int order[MAX_ENTRIES],int numEntries, int numClusters, int index[MAX_ENTRIES])
+void quantLineConstr(float data[][DIMENSION], int order[MAX_ENTRIES],int numEntries, int numClusters, int index[MAX_ENTRIES])
 {
 	// Data should be centered, otherwise will not work
 	// The running time (number of iteration of the external loop) is
@@ -584,7 +584,7 @@ void quantLineConstr(double data[][DIMENSION], int order[MAX_ENTRIES],int numEnt
 
 	int level;
 
-	double t,s;
+	float t,s;
 
 	// We need paddingof 0 on -1 index
 	int  cluster_[MAX_CLUSTERS+1]={0};
@@ -593,15 +593,15 @@ void quantLineConstr(double data[][DIMENSION], int order[MAX_ENTRIES],int numEnt
 	int bestCluster[MAX_CLUSTERS];
 	// stores the las index for the cluster
 
-	double cov[DIMENSION][DIMENSION];
-	double dir[DIMENSION];
+	float cov[DIMENSION][DIMENSION];
+	float dir[DIMENSION];
 
 
-	double gcAcc[MAX_CLUSTERS][DIMENSION];// Clusters' graviti centers
-	double gcSAcc[MAX_CLUSTERS][DIMENSION];// Clusters' graviti centers
+	float gcAcc[MAX_CLUSTERS][DIMENSION];// Clusters' graviti centers
+	float gcSAcc[MAX_CLUSTERS][DIMENSION];// Clusters' graviti centers
 
 
-	double nError=0;   // not the actual error, but some (decreasing) linear functional of it represented
+	float nError=0;   // not the actual error, but some (decreasing) linear functional of it represented
 	// as numerator and denominator
 
 	level=1;
@@ -621,9 +621,9 @@ void quantLineConstr(double data[][DIMENSION], int order[MAX_ENTRIES],int numEnt
 
 		k = order[--cluster[level-1]];
 
-		s=(cluster[level-1]-cluster[level-2]) == 0 ? 0: 1/sqrt( (double) (cluster[level-1]-cluster[level-2])); // see cluster_ decl for
+		s=(cluster[level-1]-cluster[level-2]) == 0 ? 0: 1/sqrt( (float) (cluster[level-1]-cluster[level-2])); // see cluster_ decl for
 		// cluster[-1] value
-		t=1/sqrt((double) (numEntries-cluster[level-1]));
+		t=1/sqrt((float) (numEntries-cluster[level-1]));
 
 		for(i=0;i<DIMENSION;i++) {
 			gcAcc[level  ][i] += data[k][i];
@@ -673,20 +673,20 @@ void quantLineConstr(double data[][DIMENSION], int order[MAX_ENTRIES],int numEnt
 	}
 }
 
-double totalError(double data[MAX_ENTRIES][DIMENSION],double data2[MAX_ENTRIES][DIMENSION],int numEntries)
+float totalError(float data[MAX_ENTRIES][DIMENSION],float data2[MAX_ENTRIES][DIMENSION],int numEntries)
 {
 	int i,j;
-	double t=0;
+	float t=0;
 	for (i=0;i<numEntries;i++)
 		for (j=0;j<DIMENSION;j++)
 			t+= (data[i][j]-data2[i][j])*(data[i][j]-data2[i][j]);
 	return t;
 };
 
-double totalError_d(double data[MAX_ENTRIES][MAX_DIMENSION_BIG],double data2[MAX_ENTRIES][MAX_DIMENSION_BIG],int numEntries, int dimension)
+float totalError_d(float data[MAX_ENTRIES][MAX_DIMENSION_BIG],float data2[MAX_ENTRIES][MAX_DIMENSION_BIG],int numEntries, int dimension)
 {
 	int i,j;
-	double t=0;
+	float t=0;
 	for (i=0;i<numEntries;i++)
 		for (j=0;j<dimension;j++)
 			t+= (data[i][j]-data2[i][j])*(data[i][j]-data2[i][j]);
@@ -694,21 +694,21 @@ double totalError_d(double data[MAX_ENTRIES][MAX_DIMENSION_BIG],double data2[MAX
 	return t;
 };
 
-double optQuantEven(
-		double data[MAX_ENTRIES][DIMENSION],
+float optQuantEven(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 )
 {
 	int maxTry=MAX_TRY;
 	int i,j,k;
-	double t,s;
-	double centered[MAX_ENTRIES][DIMENSION];
-	double ordered[MAX_ENTRIES][DIMENSION];
-	double mean[DIMENSION];
-	double cov[DIMENSION][DIMENSION];
-	double projected[MAX_ENTRIES];
+	float t,s;
+	float centered[MAX_ENTRIES][DIMENSION];
+	float ordered[MAX_ENTRIES][DIMENSION];
+	float mean[DIMENSION];
+	float cov[DIMENSION][DIMENSION];
+	float projected[MAX_ENTRIES];
 
 	int order[MAX_ENTRIES];
 
@@ -778,7 +778,7 @@ double optQuantEven(
 	}
 	s=t=0;
 
-	double q=0;
+	float q=0;
 
 	for (k=0;k<numEntries;k++) {
 		s+= index[k];
@@ -795,9 +795,9 @@ double optQuantEven(
 
 
 
-	s /= (double) numEntries;
+	s /= (float) numEntries;
 
-	t = t - s * s * (double) numEntries;
+	t = t - s * s * (float) numEntries;
 
 	ASSERT(t !=0);
 
@@ -818,11 +818,11 @@ double optQuantEven(
 };
 
 
-int requantize(double data[MAX_ENTRIES][DIMENSION],
-							 double centers[MAX_CLUSTERS][DIMENSION], int numEntries, int numClusters,int index[MAX_ENTRIES] )
+int requantize(float data[MAX_ENTRIES][DIMENSION],
+							 float centers[MAX_CLUSTERS][DIMENSION], int numEntries, int numClusters,int index[MAX_ENTRIES] )
 {
 	int i,j,k;
-	double p,q;
+	float p,q;
 	int cnt[MAX_CLUSTERS];
 	int change =0;
 
@@ -857,32 +857,32 @@ int requantize(double data[MAX_ENTRIES][DIMENSION],
 	}
 	for(j=0;j<numClusters;j++)
 		for(k=0;k<DIMENSION;k++)
-			centers[j][k]/=(double) cnt[j];
+			centers[j][k]/=(float) cnt[j];
 
 	return(change);
 }
 
-double optQuantLineConstr(
-		double data[MAX_ENTRIES][DIMENSION],
+float optQuantLineConstr(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION]
+		float out[MAX_ENTRIES][DIMENSION]
 )
 {
 
 	int maxTry=MAX_TRY;
 
 	int i,j,k;
-	double t;
+	float t;
 
-	double centered[MAX_ENTRIES][DIMENSION];
+	float centered[MAX_ENTRIES][DIMENSION];
 
-	double mean[DIMENSION];
+	float mean[DIMENSION];
 
-	double cov[DIMENSION][DIMENSION];
+	float cov[DIMENSION][DIMENSION];
 
-	double projected[MAX_ENTRIES];
+	float projected[MAX_ENTRIES];
 
-	double direction [DIMENSION];
+	float direction [DIMENSION];
 
 	int order[MAX_ENTRIES];
 
@@ -946,9 +946,9 @@ double optQuantLineConstr(
 		quantLineConstr(centered, order, numEntries, numClusters, index);
 
 	}
-	double gcAcc[MAX_CLUSTERS][DIMENSION];
-	double gcSAcc[MAX_CLUSTERS][DIMENSION];
-	double gcS[MAX_CLUSTERS];
+	float gcAcc[MAX_CLUSTERS][DIMENSION];
+	float gcSAcc[MAX_CLUSTERS][DIMENSION];
+	float gcS[MAX_CLUSTERS];
 
 
 	for(i=0;i<MAX_CLUSTERS;i++) {
@@ -967,8 +967,8 @@ double optQuantLineConstr(
 	for(i=0;i<numClusters;i++)
 		for (j=0;j<DIMENSION;j++)
 			if (gcS[i]!=0) {
-				gcSAcc[i][j] = gcAcc[i][j]/sqrt((double)gcS[i]);
-				gcAcc[i][j] /= ((double)gcS[i]);
+				gcSAcc[i][j] = gcAcc[i][j]/sqrt((float)gcS[i]);
+				gcAcc[i][j] /= ((float)gcS[i]);
 			}
 			else
 				gcSAcc[i][j] = 0;
@@ -991,12 +991,12 @@ double optQuantLineConstr(
 	return totalError(data,out,numEntries);
 };
 
-void quantTrace(double data[MAX_ENTRIES_QUANT_TRACE][DIMENSION],int numEntries, int numClusters, int index[MAX_ENTRIES_QUANT_TRACE]) {
+void quantTrace(float data[MAX_ENTRIES_QUANT_TRACE][DIMENSION],int numEntries, int numClusters, int index[MAX_ENTRIES_QUANT_TRACE]) {
 	// Data should be centered, otherwise will not work
 	int i,j,k;
-	double sdata[2*MAX_ENTRIES][DIMENSION];
-	double  dpAcc [DIMENSION];
-	double M =0;
+	float sdata[2*MAX_ENTRIES][DIMENSION];
+	float  dpAcc [DIMENSION];
+	float M =0;
 	struct TRACE  *tr ;
 
 	tr=amd_trs[numClusters-1][numEntries-1];
@@ -1021,7 +1021,7 @@ void quantTrace(double data[MAX_ENTRIES_QUANT_TRACE][DIMENSION],int numEntries, 
     dpAcc[0]+=sdata[tr[i].k][0];\
     dpAcc[1]+=sdata[tr[i].k][1];\
     dpAcc[2]+=sdata[tr[i].k][2];\
-    { double c; \
+    { float c; \
     c = (dpAcc[0]*dpAcc[0]+dpAcc[1]*dpAcc[1]+dpAcc[2]*dpAcc[2])*tr[i].d;\
     if (c > M) {k=i;M=c;};};
 
@@ -1064,17 +1064,17 @@ void quantTrace(double data[MAX_ENTRIES_QUANT_TRACE][DIMENSION],int numEntries, 
 	}
 }
 
-void quantTrace_d(double data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int numEntries, int numClusters, int index[MAX_ENTRIES_QUANT_TRACE],int dimension)
+void quantTrace_d(float data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int numEntries, int numClusters, int index[MAX_ENTRIES_QUANT_TRACE],int dimension)
 {
 	// Data should be centered, otherwise will not work
 
 	int i,j,k;
 
-	double sdata[2*MAX_ENTRIES][MAX_DIMENSION_BIG];
+	float sdata[2*MAX_ENTRIES][MAX_DIMENSION_BIG];
 
-	double  dpAcc [MAX_DIMENSION_BIG];
+	float  dpAcc [MAX_DIMENSION_BIG];
 
-	double M =0;
+	float M =0;
 
 	struct TRACE  *tr ;
 	tr=amd_trs[numClusters-1][numEntries-1];
@@ -1099,7 +1099,7 @@ void quantTrace_d(double data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int nu
 #define UROLL_STEP_1(i) \
     dpAcc[0]+=sdata[tr[i].k][0];\
     {\
-        double c; \
+        float c; \
         c = (dpAcc[0]*dpAcc[0])*tr[i].d;\
         if (c > M) {k=i;M=c;};\
     };
@@ -1107,7 +1107,7 @@ void quantTrace_d(double data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int nu
 #define UROLL_STEP_2(i) \
     dpAcc[0]+=sdata[tr[i].k][0];\
     dpAcc[1]+=sdata[tr[i].k][1];\
-    { double c; \
+    { float c; \
     c = (dpAcc[0]*dpAcc[0]+dpAcc[1]*dpAcc[1])*tr[i].d;\
     if (c > M) {k=i;M=c;};};
 
@@ -1115,7 +1115,7 @@ void quantTrace_d(double data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int nu
     dpAcc[0]+=sdata[tr[i].k][0];\
     dpAcc[1]+=sdata[tr[i].k][1];\
     dpAcc[2]+=sdata[tr[i].k][2];\
-    { double c; \
+    { float c; \
     c = (dpAcc[0]*dpAcc[0]+dpAcc[1]*dpAcc[1]+dpAcc[2]*dpAcc[2])*tr[i].d;\
     if (c > M) {k=i;M=c;};};
 
@@ -1124,7 +1124,7 @@ void quantTrace_d(double data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int nu
     dpAcc[1]+=sdata[tr[i].k][1];\
     dpAcc[2]+=sdata[tr[i].k][2];\
     dpAcc[3]+=sdata[tr[i].k][3];\
-    { double c; \
+    { float c; \
     c = (dpAcc[0]*dpAcc[0]+dpAcc[1]*dpAcc[1]+dpAcc[2]*dpAcc[2]+dpAcc[3]*dpAcc[3])*tr[i].d;\
     if (c > M) {k=i;M=c;};};
 
@@ -1197,7 +1197,7 @@ void quantTrace_d(double data[MAX_ENTRIES_QUANT_TRACE][MAX_DIMENSION_BIG],int nu
 	}
 }
 
-void quant_AnD_Shell(double* v_, int k, int n, int *idx) {
+void quant_AnD_Shell(float* v_, int k, int n, int *idx) {
 	// input:
 	//
 	// v_  points, might be uncentered
@@ -1210,17 +1210,17 @@ void quant_AnD_Shell(double* v_, int k, int n, int *idx) {
 	//
 #define MAX_BLOCK MAX_ENTRIES
 	int i,j;
-	double v[MAX_BLOCK];
-	double z[MAX_BLOCK];
+	float v[MAX_BLOCK];
+	float z[MAX_BLOCK];
 	a d[MAX_BLOCK];
-	double l;
-	double mm;
-	double r=0;
+	float l;
+	float mm;
+	float r=0;
 	int mi;
 
 	ASSERT((v_ != NULL) && (n>1) && (k>1));
 
-	double m, M, s, dm=0.;
+	float m, M, s, dm=0.;
 	m=M=v_[0];
 
 	for (i=1; i < n;i++) {
@@ -1245,9 +1245,9 @@ void quant_AnD_Shell(double* v_, int k, int n, int *idx) {
 		dm+= d[i].d;
 		r += d[i].d*d[i].d;
 	}
-	if (n*r- dm*dm >= (double)(n-1)/4 /*slack*/ /2) {
+	if (n*r- dm*dm >= (float)(n-1)/4 /*slack*/ /2) {
 
-		dm /= (double)n;
+		dm /= (float)n;
 
 		for (i=0; i < n;i++)
 			d[i].d -= dm;
@@ -1257,7 +1257,7 @@ void quant_AnD_Shell(double* v_, int k, int n, int *idx) {
 		// got into fundamental simplex
 		// move coordinate system origin to its center
 		for (i=0; i < n;i++)
-			d[i].d -= (2.*(double)i+1-(double)n)/2./(double)n;
+			d[i].d -= (2.*(float)i+1-(float)n)/2./(float)n;
 
 		mm=l=0.;
 		j=-1;
@@ -1284,11 +1284,11 @@ void quant_AnD_Shell(double* v_, int k, int n, int *idx) {
 		idx[i]-=mi;
 }
 
-double optQuantTrace(
-		double data[MAX_ENTRIES][DIMENSION],
+float optQuantTrace(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index_[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 )
 {
 	
@@ -1297,17 +1297,17 @@ double optQuantTrace(
 	int maxTry=MAX_TRY;
 
 	int i,j,k;
-	double t,s;
+	float t,s;
 
-	double centered[MAX_ENTRIES][DIMENSION];
+	float centered[MAX_ENTRIES][DIMENSION];
 
-	double ordered[MAX_ENTRIES][DIMENSION];
+	float ordered[MAX_ENTRIES][DIMENSION];
 
-	double mean[DIMENSION];
+	float mean[DIMENSION];
 
-	double cov[DIMENSION][DIMENSION];
+	float cov[DIMENSION][DIMENSION];
 
-	double projected[MAX_ENTRIES];
+	float projected[MAX_ENTRIES];
 
 	int order[MAX_ENTRIES];
 
@@ -1379,7 +1379,7 @@ double optQuantTrace(
 	}
 	s=t=0;
 
-	double q=0;
+	float q=0;
 
 	for (k=0;k<numEntries;k++) {
 		s+= index[k];
@@ -1395,9 +1395,9 @@ double optQuantTrace(
 	}
 
 
-	s /= (double) numEntries;
+	s /= (float) numEntries;
 
-	t = t - s * s * (double) numEntries;
+	t = t - s * s * (float) numEntries;
 
 	ASSERT(t !=0);
 
@@ -1421,23 +1421,23 @@ double optQuantTrace(
 	return totalError(data,out,numEntries);
 }
 
-double optQuantTrace_d(
-		double data[MAX_ENTRIES][MAX_DIMENSION_BIG],
+float optQuantTrace_d(
+		float data[MAX_ENTRIES][MAX_DIMENSION_BIG],
 		int numEntries, int numClusters, int index_[MAX_ENTRIES],
-		double out[MAX_ENTRIES][MAX_DIMENSION_BIG],
-		double direction [MAX_DIMENSION_BIG],double *step,
+		float out[MAX_ENTRIES][MAX_DIMENSION_BIG],
+		float direction [MAX_DIMENSION_BIG],float *step,
 		int dimension
 )
 {
 	int index[MAX_ENTRIES];
 	int maxTry=MAX_TRY;
 	int i,j,k;
-	double t,s;
-	double centered[MAX_ENTRIES][MAX_DIMENSION_BIG];
-	double ordered[MAX_ENTRIES][MAX_DIMENSION_BIG];
-	double mean[MAX_DIMENSION_BIG];
-	double cov[DIMENSION][MAX_DIMENSION_BIG];
-	double projected[MAX_ENTRIES];
+	float t,s;
+	float centered[MAX_ENTRIES][MAX_DIMENSION_BIG];
+	float ordered[MAX_ENTRIES][MAX_DIMENSION_BIG];
+	float mean[MAX_DIMENSION_BIG];
+	float cov[DIMENSION][MAX_DIMENSION_BIG];
+	float projected[MAX_ENTRIES];
 	int order[MAX_ENTRIES];
 
 	for (i=0;i<numEntries;i++)
@@ -1509,7 +1509,7 @@ double optQuantTrace_d(
 
 	s=t=0;
 
-	double q=0;
+	float q=0;
 
 	for (k=0;k<numEntries;k++)
 	{
@@ -1526,9 +1526,9 @@ double optQuantTrace_d(
 
 	}
 
-	s /= (double) numEntries;
+	s /= (float) numEntries;
 
-	t = t - s * s * (double) numEntries;
+	t = t - s * s * (float) numEntries;
 
 	ASSERT(t !=0);
 
@@ -1635,7 +1635,7 @@ void traceBuilder (int numEntries, int numClusters,struct TRACE tr [], int code[
 												if (c < MAX_TRACE) // NP
 												{
 													tr[c].k=2*ci+1;
-													tr[c].d=1./((double) q2 - (double) q*(double) q /(double) (numEntries));
+													tr[c].d=1./((float) q2 - (float) q*(float) q /(float) (numEntries));
 													code[c]=cd;
 													c++;
 												}
@@ -1679,7 +1679,7 @@ void traceBuilder (int numEntries, int numClusters,struct TRACE tr [], int code[
 												if (c < MAX_TRACE) // NP
 												{
 													tr[c].k=2*ci;
-													tr[c].d=1./((double) q2 - (double) q*(double) q /(double) (numEntries));
+													tr[c].d=1./((float) q2 - (float) q*(float) q /(float) (numEntries));
 													code[c]=cd;
 													c++;
 												}
@@ -1710,22 +1710,22 @@ void traceBuilder (int numEntries, int numClusters,struct TRACE tr [], int code[
 	*trcnt=c;
 }
 
-double optQuantAnD(
-		double data[MAX_ENTRIES][DIMENSION],
+float optQuantAnD(
+		float data[MAX_ENTRIES][DIMENSION],
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][DIMENSION],
-		double direction [DIMENSION],double *step
+		float out[MAX_ENTRIES][DIMENSION],
+		float direction [DIMENSION],float *step
 )
 {
 	int index_[MAX_ENTRIES];
 	int maxTry=MAX_TRY*10;
 	int try_two=50;
 	int i,j,k;
-	double t,s;
-	double centered[MAX_ENTRIES][DIMENSION];
-	double mean[DIMENSION];
-	double cov[DIMENSION][DIMENSION];
-	double projected[MAX_ENTRIES];
+	float t,s;
+	float centered[MAX_ENTRIES][DIMENSION];
+	float mean[DIMENSION];
+	float cov[DIMENSION][DIMENSION];
+	float projected[MAX_ENTRIES];
 
 	int order_[MAX_ENTRIES];
 
@@ -1763,7 +1763,7 @@ double optQuantAnD(
 
 		if (i) {
 			do {
-				double q;
+				float q;
 				q=s=t=0;
 
 				for (k=0;k<numEntries;k++) {
@@ -1779,8 +1779,8 @@ double optQuantAnD(
 
 				}
 
-				s /= (double) numEntries;
-				t = t - s * s * (double) numEntries;
+				s /= (float) numEntries;
+				t = t - s * s * (float) numEntries;
 				ASSERT(t !=0);
 				t = (t == 0 ? 0. : 1/t);
 				// We need to requantize
@@ -1832,7 +1832,7 @@ double optQuantAnD(
 	}
 	s=t=0;
 
-	double q=0;
+	float q=0;
 
 	for (k=0;k<numEntries;k++) {
 		s+= index[k];
@@ -1847,9 +1847,9 @@ double optQuantAnD(
 
 	}
 
-	s /= (double) numEntries;
+	s /= (float) numEntries;
 
-	t = t - s * s * (double) numEntries;
+	t = t - s * s * (float) numEntries;
 	ASSERT(t !=0);
 
 
@@ -1870,11 +1870,11 @@ double optQuantAnD(
 	return totalError(data,out,numEntries);
 }
 
-double optQuantAnD_d(
-		double data[MAX_ENTRIES][MAX_DIMENSION_BIG],
+float optQuantAnD_d(
+		float data[MAX_ENTRIES][MAX_DIMENSION_BIG],
 		int numEntries, int numClusters, int index[MAX_ENTRIES],
-		double out[MAX_ENTRIES][MAX_DIMENSION_BIG],
-		double direction [MAX_DIMENSION_BIG],double *step,
+		float out[MAX_ENTRIES][MAX_DIMENSION_BIG],
+		float direction [MAX_DIMENSION_BIG],float *step,
 		int dimension
 )
 {
@@ -1884,15 +1884,15 @@ double optQuantAnD_d(
 	int try_two=50;
 
 	int i,j,k;
-	double t,s;
+	float t,s;
 
-	double centered[MAX_ENTRIES][MAX_DIMENSION_BIG];
+	float centered[MAX_ENTRIES][MAX_DIMENSION_BIG];
 
-	double mean[MAX_DIMENSION_BIG];
+	float mean[MAX_DIMENSION_BIG];
 
-	double cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG];
+	float cov[MAX_DIMENSION_BIG][MAX_DIMENSION_BIG];
 
-	double projected[MAX_ENTRIES];
+	float projected[MAX_ENTRIES];
 
 	int order_[MAX_ENTRIES];
 
@@ -1930,7 +1930,7 @@ double optQuantAnD_d(
 		{
 			do
 			{
-				double q;
+				float q;
 				q=s=t=0;
 
 				for (k=0;k<numEntries;k++)
@@ -1948,8 +1948,8 @@ double optQuantAnD_d(
 
 				}
 
-				s /= (double) numEntries;
-				t = t - s * s * (double) numEntries;
+				s /= (float) numEntries;
+				t = t - s * s * (float) numEntries;
 				ASSERT(t !=0);
 				t = (t == 0 ? 0. : 1/t);
 				// We need to requantize
@@ -2005,7 +2005,7 @@ double optQuantAnD_d(
 	}
 	s=t=0;
 
-	double q=0;
+	float q=0;
 
 	for (k=0;k<numEntries;k++)
 	{
@@ -2021,9 +2021,9 @@ double optQuantAnD_d(
 		q+= direction[j]* direction[j];
 	}
 
-	s /= (double) numEntries;
+	s /= (float) numEntries;
 
-	t = t - s * s * (double) numEntries;
+	t = t - s * s * (float) numEntries;
 
 	ASSERT(t !=0);
 

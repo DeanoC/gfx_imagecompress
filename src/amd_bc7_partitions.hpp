@@ -33,8 +33,8 @@ extern uint32_t    BC7_FIXUPINDICES[MAX_SUBSETS][MAX_PARTITIONS][3];
 
 
 extern void    Partition(uint32_t partition,
-												 double in[][MAX_DIMENSION_BIG],
-												 double subsets[MAX_SUBSETS][MAX_SUBSET_SIZE][MAX_DIMENSION_BIG],
+												 float const *in,
+												 float subsets[MAX_SUBSETS][MAX_SUBSET_SIZE][MAX_DIMENSION_BIG],
 												 uint32_t count[MAX_SUBSETS],
 												 uint32_t blockType,
 												 int   dimension);

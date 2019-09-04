@@ -29,20 +29,16 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC5(Image_ImageHeader c
 			for (uint32_t x = 0; x < blocksX; ++x) {
 				uint32_t compressedBlock[4];
 
-				float srcBlock[4 * 4 * 4];
-
-				ImageCompress::ReadNxNBlock(src, 4, 4,
-																		!srcHasAlpha, srcBlock, x * 4, y * 4, w);
-				// extract just the red and green
 				float redBlock[4 * 4];
 				float greenBlock[4 * 4];
-				for (uint32_t i = 0; i < 16; i++) {
-					redBlock[i] = srcBlock[(i * 4) + 0];
-					greenBlock[i] = srcBlock[(i * 4) + 1];
-				}
 
-				CompressAlphaBlock(redBlock, compressedBlock + 0);
-				CompressAlphaBlock(greenBlock, compressedBlock + 2);
+				ImageCompress::ReadNxNSingleBlockF(src, 4, 4,
+																					 !srcHasAlpha, redBlock, 0, x * 4, y * 4, w);
+				ImageCompress::ReadNxNSingleBlockF(src, 4, 4,
+																					 !srcHasAlpha, greenBlock, 1, x * 4, y * 4, w);
+
+				Image_CompressAMDAlphaSingleModeBlock(redBlock, compressedBlock);
+				Image_CompressAMDAlphaSingleModeBlock(greenBlock, compressedBlock + 2);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

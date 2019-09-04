@@ -7,6 +7,22 @@
 #include "gfx_imagecompress/imagecompress.h"
 #include "block_utils.hpp"
 #include "amd_bcx_helpers.hpp"
+AL2O3_EXTERN_C void Image_CompressAMDRGBSingleModeBlock(float const *input,
+																								 bool adaptiveColourWeights,
+																								 bool b3DRefinement,
+																								 uint8_t refinementSteps,
+																								 void *out) {
+
+	float weights[3];
+	ImageCompress::CalculateColourWeightings(input, weights, adaptiveColourWeights);
+
+	CompressRGBBlock(input,
+											(uint32_t *) out,
+											weights,
+											b3DRefinement,
+											refinementSteps);
+
+}
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC3(Image_ImageHeader const *src,
 																														 Image_CompressAMDBackendOptions const *amdOptions,
@@ -32,18 +48,18 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC3(Image_ImageHeader c
 			for (uint32_t x = 0; x < blocksX; ++x) {
 				uint32_t compressedBlock[4];
 
-				float srcBlock[4 * 4 * 4];
-				float weights[3];
+				float rgbBlock[4 * 4 * 3];
+				float alphaBlock[4 * 4];
 
-				ImageCompress::ReadNxNBlock(src, 4, 4,
-																		!srcHasAlpha, srcBlock, x * 4, y * 4, w);
-				ImageCompress::CalculateColourWeightings(srcBlock, weights, amdOptions->AdaptiveColourWeights);
+				ImageCompress::ReadNxNSplitBlockF(src, 4, 4,
+																		!srcHasAlpha, rgbBlock, alphaBlock, x * 4, y * 4, w);
 
-				CompressRGBABlock(srcBlock,
-													compressedBlock,
-													weights,
-													amdOptions->b3DRefinement,
-													amdOptions->RefinementSteps);
+				Image_CompressAMDAlphaSingleModeBlock(alphaBlock, compressedBlock);
+				Image_CompressAMDRGBSingleModeBlock(rgbBlock,
+																		 amdOptions->AdaptiveColourWeights,
+																		 amdOptions->b3DRefinement,
+																		 amdOptions->RefinementSteps,
+																		 compressedBlock + 2);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

@@ -1005,8 +1005,8 @@ uint32_t  BC7_FIXUPINDICES[MAX_SUBSETS][MAX_PARTITIONS][3] =
 // Reversible partitioning operation for BC7
 //
 void    Partition(uint32_t partition,
-									double in[][MAX_DIMENSION_BIG],
-									double subsets[MAX_SUBSETS][MAX_SUBSET_SIZE][MAX_DIMENSION_BIG],
+									float const *in,
+									float subsets[MAX_SUBSETS][MAX_SUBSET_SIZE][MAX_DIMENSION_BIG],
 									uint32_t count[MAX_SUBSETS],
 									uint32_t blockType,
 									int   dimension)
@@ -1042,7 +1042,7 @@ void    Partition(uint32_t partition,
 		uint32_t   subset = table[i];
 		for(j=0; j<dimension; j++)
 		{
-			subsets[subset][count[subset]][j] = in[i][j];
+			subsets[subset][count[subset]][j] = in[i * 4 + j];
 		}
 		if(dimension < MAX_DIMENSION_BIG)
 		{
