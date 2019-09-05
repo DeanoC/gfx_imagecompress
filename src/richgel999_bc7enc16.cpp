@@ -1,6 +1,6 @@
 // File: bc7enc16.c - Richard Geldreich, Jr. 4/2018 - MIT license or public domain (see end of file)
 #include "al2o3_platform/platform.h"
-#include "richgel99_bc7enc16.h"
+#include "richgel999_bc7enc16.h"
 #include <math.h>
 #include <memory.h>
 #include <assert.h>
@@ -10,18 +10,18 @@
 #include "block_utils.hpp"
 #include "tiny_imageformat/tinyimageformat_encode.h"
 
-static Image_CompressRichGel99BackendOptions* Image_CompressDefaultRichGel99Options() {
-	static Image_CompressRichGel99BackendOptions options {
+static Image_CompressRichGel999BackendOptions *Image_CompressDefaultRichGel99Options() {
+	static Image_CompressRichGel999BackendOptions options{
 		true,
 		false
 	};
 	return &options;
 }
 
-AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel99BC7(Image_ImageHeader const *src,
-																																	 Image_CompressRichGel99BackendOptions const *richOptions,
-																																	 Image_CompressProgressFunc progressCallback,
-																																	 void *userCallbackData) {
+AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel999BC7(Image_ImageHeader const *src,
+																																		Image_CompressRichGel999BackendOptions const *richOptions,
+																																		Image_CompressProgressFunc progressCallback,
+																																		void *userCallbackData) {
 	if (src->depth > 1)
 		return nullptr;
 
@@ -54,7 +54,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel99BC7(Image_ImageHe
 
 				TinyImageFormat_EncodeLogicalPixelsF(TinyImageFormat_R8G8B8A8_UNORM, srcBlock, 16, &output);
 
-				Image_CompressRichGel99BC7enc16(packBlock, richOptions->fast, richOptions->perceptual, compressedBlock);
+				Image_CompressRichGel999BC7enc16(packBlock, richOptions->fast, richOptions->perceptual, compressedBlock);
 
 				ImageCompress::WriteNxNBlock(dst, 4, 4,
 																		 compressedBlock, sizeof(compressedBlock),

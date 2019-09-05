@@ -47,8 +47,8 @@ set(Src
 		block_utils.hpp
 		block_utils.cpp
 
-		richgel99_bc7enc16.cpp
-		richgel99_bc7enc16.h
+		richgel999_bc7enc16.cpp
+		richgel999_bc7enc16.h
 		)
 
 set(Deps

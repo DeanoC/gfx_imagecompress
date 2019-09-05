@@ -43,7 +43,7 @@ typedef struct Image_CompressAMDBackendOptions {
 typedef struct Image_CompressRichGel99BackendOptions {
 	bool perceptual;
 	bool fast;
-} Image_CompressRichGel99BackendOptions;
+} Image_CompressRichGel999BackendOptions;
 
 AL2O3_EXTERN_C Image_CompressHandle Image_CompressCreateContext();
 AL2O3_EXTERN_C void Image_CompressDestroyContext(Image_CompressHandle handle);
@@ -88,9 +88,9 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader c
 																														 void *userCallbackData);
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel99BC7(Image_ImageHeader const *src,
-																																	 Image_CompressRichGel99BackendOptions const *richOptions,
-																														 Image_CompressProgressFunc progressCallback,
-																														 void *userCallbackData);
+																																	 Image_CompressRichGel999BackendOptions const *richOptions,
+																																	 Image_CompressProgressFunc progressCallback,
+																																	 void *userCallbackData);
 
 
 // lowest level interface block compression API
@@ -129,7 +129,7 @@ AL2O3_EXTERN_C void Image_CompressAMDMultiModeLDRBlock(float const input[4 * 4 *
 																											 void *out);
 
 // takes 16 RGBA uint32_t inputs an outputs 16 byte multi mode (only 1 or 6) block
-AL2O3_EXTERN_C void Image_CompressRichGel99BC7enc16(uint32_t const input[4 * 4],
-																										bool fast,
-																										bool perceptual,
-																										void *out);
+AL2O3_EXTERN_C void Image_CompressRichGel999BC7enc16(uint32_t const input[4 * 4],
+																										 bool fast,
+																										 bool perceptual,
+																										 void *out);

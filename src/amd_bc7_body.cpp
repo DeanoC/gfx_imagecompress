@@ -116,126 +116,6 @@ void WriteBit(uint8_t *base,
 	base[byteLocation] = val & 0xff;
 }
 
-// Used by BC7_Decode
-const float rampLerpWeights[5][1 << MAX_INDEX_BITS] =
-		{
-#if USE_FINAL_BC7_WEIGHTS
-				{0.0},  // 0 bit index
-				{0.0, 1.0}, // 1 bit index
-				{0.0, 21.0 / 64.0, 43.0 / 64.0, 1.0}, // 2 bit index
-				{0.0, 9.0 / 64.0, 18.0 / 64.0, 27.0 / 64.0, 37.0 / 64.0, 46.0 / 64.0, 55.0 / 64.0, 1.0}, // 3 bit index
-				{0.0, 4.0 / 64.0, 9.0 / 64.0, 13.0 / 64.0, 17.0 / 64.0, 21.0 / 64.0, 26.0 / 64.0, 30.0 / 64.0,
-				 34.0 / 64.0, 38.0 / 64.0, 43.0 / 64.0, 47.0 / 64.0, 51.0 / 64.0, 55.0 / 64.0, 60.0 / 64.0, 1.0} // 4 bit index
-#else
-		// Pure linear weights
-		{0.0},  // 0 bit index
-		{0.0, 1.0}, // 1 bit index
-		{0.0, 1.0/3.0, 2.0/3.0, 1.0}, // 2 bit index
-		{0.0, 1.0/7.0, 2.0/7.0, 3.0/7.0, 4.0/7.0, 5.0/7.0, 6.0/7.0, 1.0}, // 3 bit index
-		{0.0, 1.0/15.0, 2.0/15.0, 3.0/15.0, 4.0/15.0, 5.0/15.0, 6.0/15.0, 7.0/15.0,
-		 8.0/15.0, 9.0/15.0, 10.0/15.0, 11.0/15.0, 12.0/15.0, 13.0/15.0, 14.0/15.0, 1.0} // 4 bit index
-#endif
-		};
-
-
-//
-// This routine generates the ramp colours with correct rounding
-//
-//
-//
-// Used by BC7_Decode
-
-#ifndef USE_HIGH_PRECISION_INTERPOLATION_BC7
-uint16_t aWeight2[] = { 0, 21, 43, 64 };
-uint16_t aWeight3[] = { 0, 9, 18, 27, 37, 46, 55, 64 };
-uint16_t aWeight4[] = { 0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64 };
-
-uint8_t interpolate(uint8_t e0, uint8_t e1, uint8_t index, uint8_t indexprecision)
-{
-		if (indexprecision == 2)
-				return (uint8_t)(((64 - aWeight2[index])*uint16_t(e0) + aWeight2[index] * uint16_t(e1) + 32) >> 6);
-		else if (indexprecision == 3)
-				return (uint8_t)(((64 - aWeight3[index])*uint16_t(e0) + aWeight3[index] * uint16_t(e1) + 32) >> 6);
-		else // indexprecision == 4
-				return (uint8_t)(((64 - aWeight4[index])*uint16_t(e0) + aWeight4[index] * uint16_t(e1) + 32) >> 6);
-}
-#endif
-
-void GetRamp(uint32_t endpoint[][MAX_DIMENSION_BIG],
-						 float ramp[MAX_DIMENSION_BIG][(1 << MAX_INDEX_BITS)],
-						 uint32_t clusters[2],
-						 uint32_t componentBits[MAX_DIMENSION_BIG]) {
-	float ep[2][MAX_DIMENSION_BIG];
-	uint32_t i;
-
-	// Expand each endpoint component to 8 bits by shifting the MSB to bit 7
-	// and then replicating the high bits to the low bits revealed by
-	// the shift
-	for (i = 0; i < MAX_DIMENSION_BIG; i++) {
-		ep[0][i] = 0.;
-		ep[1][i] = 0.;
-		if (componentBits[i]) {
-			ep[0][i] = (float) (endpoint[0][i] << (8 - componentBits[i]));
-			ep[1][i] = (float) (endpoint[1][i] << (8 - componentBits[i]));
-			ep[0][i] += (float) ((uint32_t) ep[0][i] >> componentBits[i]);
-			ep[1][i] += (float) ((uint32_t) ep[1][i] >> componentBits[i]);
-
-			ep[0][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ep[0][i]));
-			ep[1][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ep[1][i]));
-		}
-	}
-
-	// If this block type has no explicit alpha channel
-	// then make sure alpha is 1.0 for all points on the ramp
-	if (!componentBits[COMP_ALPHA]) {
-		ep[0][COMP_ALPHA] = ep[1][COMP_ALPHA] = 255.0f;
-	}
-
-	uint32_t rampIndex = clusters[0];
-
-	rampIndex = (uint32_t) (log((float) rampIndex) / log(2.0));
-
-	// Generate colours for the RGB ramp
-	for (i = 0; i < clusters[0]; i++) {
-#ifdef USE_HIGH_PRECISION_INTERPOLATION_BC7
-		ramp[COMP_RED][i] = floorf((ep[0][COMP_RED] * (1.0f - rampLerpWeights[rampIndex][i])) +
-				(ep[1][COMP_RED] * rampLerpWeights[rampIndex][i]) + 0.5f);
-		ramp[COMP_RED][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ramp[COMP_RED][i]));
-		ramp[COMP_GREEN][i] = floorf((ep[0][COMP_GREEN] * (1.0f - rampLerpWeights[rampIndex][i])) +
-				(ep[1][COMP_GREEN] * rampLerpWeights[rampIndex][i]) + 0.5f);
-		ramp[COMP_GREEN][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ramp[COMP_GREEN][i]));
-		ramp[COMP_BLUE][i] = floorf((ep[0][COMP_BLUE] * (1.0f - rampLerpWeights[rampIndex][i])) +
-				(ep[1][COMP_BLUE] * rampLerpWeights[rampIndex][i]) + 0.5f);
-		ramp[COMP_BLUE][i] = Math_MinF(255.0f, Math_MaxF(0.0f, ramp[COMP_BLUE][i]));
-#else
-		ramp[COMP_RED][i] = interpolate(ep[0][COMP_RED], ep[1][COMP_RED], i, rampIndex);
-				ramp[COMP_GREEN][i] = interpolate(ep[0][COMP_GREEN], ep[1][COMP_GREEN], i, rampIndex);
-				ramp[COMP_BLUE][i] = interpolate(ep[0][COMP_BLUE], ep[1][COMP_BLUE], i, rampIndex);
-#endif
-	}
-
-	rampIndex = clusters[1];
-	rampIndex = (uint32_t) (log((float) rampIndex) / log(2.0));
-
-	if (!componentBits[COMP_ALPHA]) {
-		for (i = 0; i < clusters[1]; i++) {
-			ramp[COMP_ALPHA][i] = 255.;
-		}
-	} else {
-
-		// Generate alphas
-		for (i = 0; i < clusters[1]; i++) {
-#ifdef USE_HIGH_PRECISION_INTERPOLATION_BC7
-			ramp[COMP_ALPHA][i] = floorf((ep[0][COMP_ALPHA] * (1.0f - rampLerpWeights[rampIndex][i])) +
-					(ep[1][COMP_ALPHA] * rampLerpWeights[rampIndex][i]) + 0.5f);
-			ramp[COMP_ALPHA][i] = Math_MinF(255.0f, Math_MaxF(0.f, ramp[COMP_ALPHA][i]));
-#else
-			ramp[COMP_ALPHA][i] = interpolate(ep[0][COMP_ALPHA], ep[1][COMP_ALPHA], i, rampIndex);
-#endif
-		}
-
-	}
-}
 // Threshold quality below which we will always run fast quality and shaking
 // Selfnote: User should be able to set this?
 // Default FQuality is at 0.1 < g_qFAST_THRESHOLD which will cause the SingleIndex compression to start skipping shape blocks
@@ -1144,7 +1024,6 @@ float BC7BlockEncoder::CompressBlock(float const inN[MAX_SUBSET_SIZE * MAX_DIMEN
 	float in[MAX_SUBSET_SIZE * MAX_DIMENSION_BIG];
 
 	// Check if the input block has any alpha values that are not 1
-	// We assume 8-bit input here, so 1 is mapped to 255.
 	// Also check if the block encodes an explicit zero or one in the
 	// alpha channel. If so then we might need also need special as the
 	// block may have a thresholded or punch-through alpha
@@ -1156,6 +1035,8 @@ float BC7BlockEncoder::CompressBlock(float const inN[MAX_SUBSET_SIZE * MAX_DIMEN
 				(inN[i * 4  + COMP_ALPHA] == 0.0)) {
 			blockAlphaZeroOne = TRUE;
 		}
+
+		// now in 0 to 255.0f range
 		for (j = 0; j < MAX_DIMENSION_BIG; j++) {
 			in[i * 4 + j] = inN[i * 4 + j] * 255.0f;
 			m_blockMin[j] = (in[i * 4  + j] < m_blockMin[j]) ? in[i * 4  + j] : m_blockMin[j];
