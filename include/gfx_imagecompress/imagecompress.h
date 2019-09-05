@@ -113,7 +113,7 @@ AL2O3_EXTERN_C void Image_CompressAMDExplictAlphaSingleModeBlock(float const inp
 
 // special case BC1 compress 4x4 (4 channel) to 8 byte BC1 RGB block threshold is 0 - 1 if <= 0 no alpha
 AL2O3_EXTERN_C void Image_CompressAMDBC1Block(float const input[4 * 4 * 4],
-																							bool adaptiveColourWeights,
+																							bool adaptiveColourWeight,
 																							bool b3DRefinement,
 																							uint8_t refinementSteps,
 																							float alphaThreshold,

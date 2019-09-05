@@ -7,22 +7,6 @@
 #include "gfx_imagecompress/imagecompress.h"
 #include "block_utils.hpp"
 #include "amd_bcx_helpers.hpp"
-AL2O3_EXTERN_C void Image_CompressAMDRGBSingleModeBlock(float const *input,
-																								 bool adaptiveColourWeights,
-																								 bool b3DRefinement,
-																								 uint8_t refinementSteps,
-																								 void *out) {
-
-	float weights[3];
-	ImageCompress::CalculateColourWeightings(input, weights, adaptiveColourWeights);
-
-	CompressRGBBlock(input,
-											(uint32_t *) out,
-											weights,
-											b3DRefinement,
-											refinementSteps);
-
-}
 
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC3(Image_ImageHeader const *src,
 																														 Image_CompressAMDBackendOptions const *amdOptions,

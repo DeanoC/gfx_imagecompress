@@ -683,7 +683,7 @@ float totalError(float data[MAX_ENTRIES][DIMENSION],float data2[MAX_ENTRIES][DIM
 	return t;
 };
 
-float totalError_d(float data[MAX_ENTRIES][MAX_DIMENSION_BIG],float data2[MAX_ENTRIES][MAX_DIMENSION_BIG],int numEntries, int dimension)
+float totalError(float data[MAX_ENTRIES][MAX_DIMENSION_BIG],float data2[MAX_ENTRIES][MAX_DIMENSION_BIG],int numEntries, int dimension)
 {
 	int i,j;
 	float t=0;
@@ -1549,7 +1549,7 @@ float optQuantTrace_d(
 	for (j=0;j<dimension;j++)
 		direction[j]/=q;
 
-	return totalError_d(data,out,numEntries, dimension);
+	return totalError(data,out,numEntries, dimension);
 }
 
 
@@ -2040,6 +2040,6 @@ float optQuantAnD_d(
 	for (j=0;j<dimension;j++)
 		direction[j]/=q;
 
-	return totalError_d(data,out,numEntries, dimension);
+	return totalError(data,out,numEntries, dimension);
 }
 

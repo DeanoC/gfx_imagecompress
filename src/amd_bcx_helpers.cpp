@@ -63,29 +63,29 @@ AL2O3_EXTERN_C void Image_CompressAMDBC1Block(float const *input,
 	uint8_t nEndpoints[2][3][2];
 	uint8_t nIndices[2][4 * 4];
 
-	double fError3 = CompRGBBlock(input, 4 * 4,
-																RG, GG, BG,
-																nEndpoints[0],
-																nIndices[0],
-																3,
-																threeDRefinement,
-																refinementSteps,
-																weights,
-																alphaThreshold > 0.0f,
-																alphaThreshold);
+	double fError3 = CompRGBABlock(input, 4 * 4,
+																 RG, GG, BG,
+																 nEndpoints[0],
+																 nIndices[0],
+																 3,
+																 threeDRefinement,
+																 refinementSteps,
+																 weights,
+																 alphaThreshold > 0.0f,
+																 alphaThreshold);
 
 	double fError4 = (fError3 == 0.0) ? FLT_MAX :
-									 CompRGBBlock(input,
-																4 * 4,
-																RG, GG, BG,
-																nEndpoints[1],
-																nIndices[1],
-																4,
-																threeDRefinement,
-																refinementSteps,
-																weights,
-																alphaThreshold > 0.0f,
-																alphaThreshold);
+									 CompRGBABlock(input,
+																 4 * 4,
+																 RG, GG, BG,
+																 nEndpoints[1],
+																 nIndices[1],
+																 4,
+																 threeDRefinement,
+																 refinementSteps,
+																 weights,
+																 alphaThreshold > 0.0f,
+																 alphaThreshold);
 
 	unsigned int nMethod = (fError3 <= fError4) ? 0 : 1;
 	unsigned int c0 = ConstructColour((nEndpoints[nMethod][RC][0] >> (8 - RG)),
@@ -104,11 +104,11 @@ AL2O3_EXTERN_C void Image_CompressAMDBC1Block(float const *input,
 		out[1] |= (nIndices[nMethod][i] << (2 * i));
 }
 
-AL2O3_EXTERN_C void Image_CompressAMDExplictAlphaSingleModeBlock(float const input[ 4 * 4 ], void *out) {
+AL2O3_EXTERN_C void Image_CompressAMDExplictAlphaSingleModeBlock(float const input[4 * 4], void *out) {
 	static const uint8_t EXPLICIT_ALPHA_PIXEL_MASK = 0xf;
 	static const uint8_t EXPLICIT_ALPHA_PIXEL_BPP = 4;
 
-	uint32_t* compressedBlock = (uint32_t*)out;
+	uint32_t *compressedBlock = (uint32_t *) out;
 	compressedBlock[0] = compressedBlock[1] = 0;
 	for (int i = 0; i < 16; i++) {
 		int nBlock = i < 8 ? 0 : 1;
@@ -122,11 +122,11 @@ AL2O3_EXTERN_C void Image_CompressAMDExplictAlphaSingleModeBlock(float const inp
 	}
 }
 
-AL2O3_EXTERN_C void Image_CompressAMDAlphaSingleModeBlock(float const input[ 4 * 4 ], void *out) {
+AL2O3_EXTERN_C void Image_CompressAMDAlphaSingleModeBlock(float const input[4 * 4], void *out) {
 	uint8_t nEndpoints[2][2];
 	uint8_t nIndices[2][4 * 4];
 
-	uint32_t* compressedBlock = (uint32_t*)out;
+	uint32_t *compressedBlock = (uint32_t *) out;
 	compressedBlock[0] = compressedBlock[1] = 0;
 
 	float fError8 = CompBlock1X(input, 4 * 4, nEndpoints[0], nIndices[0], 8, false, 8, 0, true);
@@ -139,14 +139,17 @@ AL2O3_EXTERN_C void Image_CompressAMDAlphaSingleModeBlock(float const input[ 4 *
 
 }
 
-void Image_CompressAMDRGBSingleModeBlock(float rgbBlock[4 * 4 * 4],
-											uint32_t compressedBlock[2],
-											float *pfChannelWeights,
-											bool threeDRefinement,
-											uint8_t refinementSteps) {
+AL2O3_EXTERN_C void Image_CompressAMDRGBSingleModeBlock(float const rgbBlock[4 * 4 * 3],
+																												bool adaptiveColourWeights,
+																												bool threeDRefinement,
+																												uint8_t refinementSteps,
+																												void *out) {
 
 	uint8_t nEndpoints[3][2];
 	uint8_t nIndices[4 * 4];
+
+	float weights[3];
+	ImageCompress::CalculateColourWeightings(rgbBlock, weights, adaptiveColourWeights);
 
 	CompRGBBlock(rgbBlock, 4 * 4,
 							 RG, GG, BG,
@@ -155,9 +158,7 @@ void Image_CompressAMDRGBSingleModeBlock(float rgbBlock[4 * 4 * 4],
 							 4,
 							 threeDRefinement,
 							 refinementSteps,
-							 pfChannelWeights,
-							 false,
-							 0.0f);
+							 weights);
 
 	unsigned int c0 = ConstructColour((nEndpoints[RC][0] >> (8 - RG)),
 																		(nEndpoints[GC][0] >> (8 - GG)),
@@ -165,6 +166,8 @@ void Image_CompressAMDRGBSingleModeBlock(float rgbBlock[4 * 4 * 4],
 	unsigned int c1 = ConstructColour((nEndpoints[RC][1] >> (8 - RG)),
 																		(nEndpoints[GC][1] >> (8 - GG)),
 																		(nEndpoints[BC][1] >> (8 - BG)));
+	uint32_t *compressedBlock = (uint32_t *) out;
+
 	if (c0 <= c1)
 		compressedBlock[0] = c1 | (c0 << 16);
 	else
@@ -174,18 +177,3 @@ void Image_CompressAMDRGBSingleModeBlock(float rgbBlock[4 * 4 * 4],
 	for (int i = 0; i < 16; i++)
 		compressedBlock[1] |= (nIndices[i] << (2 * i));
 }
-
-void CompressRGBABlock(float rgbaBlock[4 * 4 * 4],
-											 uint32_t compressedBlock[4],
-											 float *pfChannelWeights,
-											 bool threeDRefinement,
-											 uint8_t refinementSteps) {
-	float alphaBlock[4 * 4];
-	for (uint32_t i = 0; i < 16; i++) {
-		alphaBlock[i] = rgbaBlock[(i * 4) + AC];
-	}
-
-	CompressAlphaBlock(alphaBlock, &compressedBlock[0]);
-	CompressRGBBlock(rgbaBlock, &compressedBlock[2], pfChannelWeights, threeDRefinement, refinementSteps);
-}
-

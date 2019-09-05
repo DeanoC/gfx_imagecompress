@@ -241,7 +241,7 @@ void GetRamp(uint32_t endpoint[][MAX_DIMENSION_BIG],
 // Default FQuality is at 0.1 < g_qFAST_THRESHOLD which will cause the SingleIndex compression to start skipping shape blocks
 // during compression
 // if user sets a value above this then all shapes will be used for compression scan for quality
-float cog_qFAST_THRESHOLD = 0.5f;
+float g_qFAST_THRESHOLD = 0.5f;
 
 // This limit is used for DualIndex Block and if fQuality is above this limit then Quantization shaking will always be performed
 // on all indexs
