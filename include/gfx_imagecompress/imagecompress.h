@@ -2,21 +2,18 @@
 
 #include "gfx_image/image.h"
 
-typedef struct Image_Compress *Image_CompressHandle;
-typedef Image_ImageHeader const *(*Image_CompressFunc)(void const *options, Image_ImageHeader const *src);
-
 typedef bool (*Image_CompressProgressFunc)(void *user, float percentage);
 
 typedef enum Image_CompressType {
 	Image_CT_None = 0,
 
-	Image_CT_BC1,
-	Image_CT_BC2,
-	Image_CT_BC3,
-	Image_CT_BC4,
-	Image_CT_BC5,
-	Image_CT_BC6H,
-	Image_CT_BC7,
+	Image_CT_DXBC1,
+	Image_CT_DXBC2,
+	Image_CT_DXBC3,
+	Image_CT_DXBC4,
+	Image_CT_DXBC5,
+	Image_CT_DXBC6H,
+	Image_CT_DXBC7,
 
 	Image_CT_ETC_RGB,
 	Image_CT_ETC2_RGB,
@@ -27,6 +24,13 @@ typedef enum Image_CompressType {
 
 	Image_CT_MAX
 } Image_CompressType;
+
+typedef enum Image_CompressPickFlags {
+	Image_CPF_AllowDXBC1to5 = 0x1,
+	Image_CPF_AllowASTC = 0x2,
+	Image_CPF_AllowETC = 0x8,
+	Image_CPF_AllowDXBC6and7 = 0x10
+} Image_CompressPickFlags;
 
 typedef struct Image_CompressBC1Options {
 	bool UseAlpha;            // default false
@@ -45,17 +49,12 @@ typedef struct Image_CompressRichGel99BackendOptions {
 	bool fast;
 } Image_CompressRichGel999BackendOptions;
 
-AL2O3_EXTERN_C Image_CompressHandle Image_CompressCreateContext();
-AL2O3_EXTERN_C void Image_CompressDestroyContext(Image_CompressHandle handle);
-
-AL2O3_EXTERN_C Image_ImageHeader const *ImageCompress_Compress(Image_CompressHandle handle,
-																															 Image_CompressType type,
-																															 void const *options, // null or option structure
+AL2O3_EXTERN_C Image_ImageHeader const *ImageCompress_Compress(Image_CompressType type,
+																															 bool fast,
 																															 Image_ImageHeader const *src);
 
-AL2O3_EXTERN_C bool Image_CompressAddCompressor(Image_CompressHandle handle,
-																								Image_CompressType type,
-																								Image_CompressFunc func);
+AL2O3_EXTERN_C Image_CompressType ImageCompress_PickCompressionType(Image_CompressPickFlags flags,
+																																		Image_ImageHeader const *src);
 
 
 // direct access to each compressor options can be null
@@ -87,10 +86,10 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC7(Image_ImageHeader c
 																														 Image_CompressProgressFunc progressCallback,
 																														 void *userCallbackData);
 
-AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel99BC7(Image_ImageHeader const *src,
-																																	 Image_CompressRichGel999BackendOptions const *richOptions,
-																																	 Image_CompressProgressFunc progressCallback,
-																																	 void *userCallbackData);
+AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel999BC7(Image_ImageHeader const *src,
+																																		Image_CompressRichGel999BackendOptions const *richOptions,
+																																		Image_CompressProgressFunc progressCallback,
+																																		void *userCallbackData);
 
 
 // lowest level interface block compression API
