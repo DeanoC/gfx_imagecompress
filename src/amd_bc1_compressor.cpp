@@ -8,8 +8,6 @@
 #include "block_utils.hpp"
 #include "amd_bcx_helpers.hpp"
 
-
-
 AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressAMDBC1(Image_ImageHeader const *src,
 																														 Image_CompressAMDBackendOptions const *amdOptions,
 																														 Image_CompressBC1Options const *options,
