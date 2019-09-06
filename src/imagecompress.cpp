@@ -25,8 +25,9 @@ AL2O3_EXTERN_C Image_ImageHeader const *ImageCompress_Compress(Image_CompressTyp
 	case Image_CT_ETC2_RGB:
 	case Image_CT_ETC_RGBA_Explicit:
 	case Image_CT_ETC_RGBA_Interpolated:
-	case Image_CT_ASTC:
+	case Image_CT_ASTC: return nullptr;
 	default: ASSERT(false);
+		return nullptr;
 	}
 }
 
@@ -79,14 +80,16 @@ AL2O3_EXTERN_C Image_CompressType ImageCompress_PickCompressionType(Image_Compre
 			return Image_CT_DXBC3;
 		}
 		if (flags & Image_CPF_AllowETC) {
-			return Image_CT_ETC_RGBA_Interpolated;
+			return Image_CT_None;
+			//			return Image_CT_ETC_RGBA_Interpolated;
 		}
 	} else {
 		if (flags & Image_CPF_AllowDXBC1to5) {
 			return Image_CT_DXBC1;
 		}
 		if (flags & Image_CPF_AllowETC) {
-			return Image_CT_ETC2_RGB;
+			return Image_CT_None;
+			//			return Image_CT_ETC2_RGB;
 		}
 	}
 
