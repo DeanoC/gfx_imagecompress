@@ -84,8 +84,8 @@ extern CMP_BTI bti[NUM_BLOCK_TYPES];
 
 // Threshold quality below which we will always run fast quality and shaking
 // Self note: User should be able to set this?
-extern float g_qFAST_THRESHOLD;
-extern float g_HIGHQULITY_THRESHOLD;
+extern double g_qFAST_THRESHOLD;
+extern double g_HIGHQULITY_THRESHOLD;
 
 class BC7BlockEncoder
 {
@@ -93,10 +93,10 @@ public:
 
 	BC7BlockEncoder(uint32_t validModeMask,
 									bool  imageNeedsAlpha,
-									float quality,
+									double quality,
 									bool colourRestrict,
 									bool alphaRestrict,
-									float performance = 1.0
+									double performance = 1.0
 	)
 	{
 		// Bug check : ModeMask must be > 0
@@ -105,11 +105,11 @@ public:
 		else
 			m_validModeMask = validModeMask;
 
-		m_quality            = Math_MinF(1.0f, Math_MaxF(quality,0.0f));
-		m_performance        = Math_MinF(1.0f, Math_MaxF(performance,0.0f));
+		m_quality            = Math_MinD(1.0, Math_MaxD(quality,0.0));
+		m_performance        = Math_MinD(1.0, Math_MaxD(performance,0.0));
 		m_imageNeedsAlpha    = imageNeedsAlpha;
-		m_smallestError      = FLT_MAX;
-		m_largestError       = 0.0f;
+		m_smallestError      = DBL_MAX;
+		m_largestError       = 0.0;
 		m_colourRestrict     = colourRestrict;
 		m_alphaRestrict      = alphaRestrict;
 
@@ -119,44 +119,44 @@ public:
 		{
 			m_shakerRangeThreshold = 0.;
 
-			// Scale m_quality to be a linar range 0 to 1 in this section 
+			// Scale m_quality to be a linar range 0 to 1 in this section
 			// to maximize quality with fast performance...
-			m_errorThreshold = 256.0f * (1.0f - ((m_quality*2.0f)/g_qFAST_THRESHOLD));
+			m_errorThreshold = 256. * (1.0 - ((m_quality*2.0)/g_qFAST_THRESHOLD));
 			// Limit the size of the partition search space based on Quality
-			m_partitionSearchSize = Math_MaxF( (1.0f/16.0f) , ((m_quality*2.0f) / g_qFAST_THRESHOLD));
+			m_partitionSearchSize = Math_MaxD( (1.0/16.0) , ((m_quality*2.0) / g_qFAST_THRESHOLD));
 		}
 		else
 		{
-			// m_qaulity = set the quality user want to see on encoding 
+			// m_qaulity = set the quality user want to see on encoding
 			// higher values will produce better encoding results.
-			// m_performance  - sets a perfoamce level for a specified quality level 
+			// m_performance  - sets a perfoamce level for a specified quality level
 
 
 			if(m_quality < g_HIGHQULITY_THRESHOLD)
 			{
 				m_shakerRangeThreshold  = 255 * (m_quality / 10);                    // gain  performance within FAST_THRESHOLD and HIGHQULITY_THRESHOLD range
-				m_errorThreshold = 256.0f * (1.0f - (m_quality/g_qFAST_THRESHOLD));
+				m_errorThreshold = 256. * (1.0 - (m_quality/g_qFAST_THRESHOLD));
 				// Limit the size of the partition search space based on Quality
-				m_partitionSearchSize = Math_MaxF( (1.0f/16.0f) , (m_quality / g_qFAST_THRESHOLD));
+				m_partitionSearchSize = Math_MaxD( (1.0/16.0) , (m_quality / g_qFAST_THRESHOLD));
 			}
 			else
 			{
 				m_shakerRangeThreshold  = 255 * m_quality;     // lowers performance with incresing values
-				m_errorThreshold = 0;                         // Dont exit early 
+				m_errorThreshold = 0;                         // Dont exit early
 				m_partitionSearchSize   = 1.0;                 // use all partitions for best quality
 			}
 		}
 	};
 
 	// This routine compresses a block and returns the RMS error
-	float CompressBlock(float const in[MAX_SUBSET_SIZE * MAX_DIMENSION_BIG],
+	double CompressBlock(float const in[MAX_SUBSET_SIZE * MAX_DIMENSION_BIG],
 											 uint8_t   out[COMPRESSED_BLOCK_SIZE]);
 
 private:
-	float quant_single_point(
-			float const data[MAX_ENTRIES][MAX_DIMENSION_BIG],
+	double quant_single_point_d(
+			double data[MAX_ENTRIES][MAX_DIMENSION_BIG],
 			int numEntries, int index[MAX_ENTRIES],
-			float out[MAX_ENTRIES][MAX_DIMENSION_BIG],
+			double out[MAX_ENTRIES][MAX_DIMENSION_BIG],
 			int epo_1[2][MAX_DIMENSION_BIG],
 			int Mi_,                // last cluster
 			int bits[3],            // including parity
@@ -164,26 +164,26 @@ private:
 			int dimension
 	);
 
-	float ep_shaker_2(
-			float data[MAX_ENTRIES][MAX_DIMENSION_BIG],
+	double ep_shaker_2_d(
+			double data[MAX_ENTRIES][MAX_DIMENSION_BIG],
 			int numEntries,
 			int index_[MAX_ENTRIES],
-			float out[MAX_ENTRIES][MAX_DIMENSION_BIG],
+			double out[MAX_ENTRIES][MAX_DIMENSION_BIG],
 			int epo_code[2][MAX_DIMENSION_BIG],
 			int size,
 			int Mi_,             // last cluster
 			int bits,            // total for all channels
 			// defined by total numbe of bits and dimensioin
 			int dimension,
-			float epo[2][MAX_DIMENSION_BIG]
+			double epo[2][MAX_DIMENSION_BIG]
 
 	);
 
-	float ep_shaker(
-			float data[MAX_ENTRIES][MAX_DIMENSION_BIG],
+	double ep_shaker_d(
+			double data[MAX_ENTRIES][MAX_DIMENSION_BIG],
 			int numEntries,
 			int index_[MAX_ENTRIES],
-			float out[MAX_ENTRIES][MAX_DIMENSION_BIG],
+			double out[MAX_ENTRIES][MAX_DIMENSION_BIG],
 			int epo_code[2][MAX_DIMENSION_BIG],
 			int Mi_,                // last cluster
 			int bits[3],            // including parity
@@ -199,7 +199,7 @@ private:
 																 uint8_t  block[COMPRESSED_BLOCK_SIZE]);
 
 	// This routine compresses a block to any of the single index modes
-	float CompressSingleIndexBlock(float const in[MAX_SUBSET_SIZE * MAX_DIMENSION_BIG],
+	double CompressSingleIndexBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_BIG],
 																	uint8_t   out[COMPRESSED_BLOCK_SIZE],
 																	uint32_t  blockMode);
 
@@ -211,31 +211,31 @@ private:
 														uint8_t   out[COMPRESSED_BLOCK_SIZE]);
 
 	// This routine compresses a block to any of the dual index modes
-	float CompressDualIndexBlock(float const in[MAX_SUBSET_SIZE * MAX_DIMENSION_BIG],
+	double CompressDualIndexBlock(double in[MAX_SUBSET_SIZE][MAX_DIMENSION_BIG],
 																uint8_t   out[COMPRESSED_BLOCK_SIZE],
 																uint32_t  blockMode);
 
 	// Bulky temporary data used during compression of a block
 	int     m_storedIndices[MAX_PARTITIONS][MAX_SUBSETS][MAX_SUBSET_SIZE];
-	float  m_storedError[MAX_PARTITIONS];
+	double  m_storedError[MAX_PARTITIONS];
 	int     m_sortedModes[MAX_PARTITIONS];
 
 	// This stores the min and max for the components of the block, and the ranges
-	float  m_blockMin[MAX_DIMENSION_BIG];
-	float  m_blockMax[MAX_DIMENSION_BIG];
-	float  m_blockRange[MAX_DIMENSION_BIG];
-	float  m_blockMaxRange;
+	double  m_blockMin[MAX_DIMENSION_BIG];
+	double  m_blockMax[MAX_DIMENSION_BIG];
+	double  m_blockRange[MAX_DIMENSION_BIG];
+	double  m_blockMaxRange;
 
 	// These are quality parameters used to select when to use the high precision quantizer
 	// and shaker paths
-	float m_quantizerRangeThreshold;
-	float m_shakerRangeThreshold;
-	float m_partitionSearchSize;
+	double m_quantizerRangeThreshold;
+	double m_shakerRangeThreshold;
+	double m_partitionSearchSize;
 
 	// Global data setup at initialisation time
-	float m_quality;
-	float m_performance;
-	float m_errorThreshold;
+	double m_quality;
+	double m_performance;
+	double m_errorThreshold;
 	uint32_t  m_validModeMask;
 	bool   m_imageNeedsAlpha;
 	bool   m_colourRestrict;
@@ -247,8 +247,8 @@ private:
 	uint32_t m_componentBits[MAX_DIMENSION_BIG];
 
 	// Error stats
-	float m_smallestError;
-	float m_largestError;
+	double m_smallestError;
+	double m_largestError;
 
 };
 

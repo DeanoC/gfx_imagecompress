@@ -3,9 +3,25 @@
 #include "gfx_image/image.hpp"
 #include "gfx_imagecompress/imagecompress.h"
 
+// BC7
+void init_ramps ();
+void Quant_Init();
+void Quant_DeInit();
+
+AL2O3_EXTERN_C void Image_CompressInit() {
+	init_ramps();
+	Quant_Init();
+}
+
+AL2O3_EXTERN_C void Image_CompressDeinit() {
+	Quant_DeInit();
+}
+
 AL2O3_EXTERN_C Image_ImageHeader const *ImageCompress_Compress(Image_CompressType type,
 																															 bool fast,
 																															 Image_ImageHeader const *src) {
+	Image_CompressInit();
+
 	switch (type) {
 	case Image_CT_None: return src;
 
@@ -29,6 +45,8 @@ AL2O3_EXTERN_C Image_ImageHeader const *ImageCompress_Compress(Image_CompressTyp
 	default: ASSERT(false);
 		return nullptr;
 	}
+
+	Image_CompressDeinit();
 }
 
 AL2O3_EXTERN_C Image_CompressType ImageCompress_PickCompressionType(Image_CompressPickFlags flags,

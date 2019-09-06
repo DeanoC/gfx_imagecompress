@@ -383,6 +383,7 @@ TEST_CASE("AMD BC7 Direct B", "[ImageCompress]") {
 }
 
 TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
+
 	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
 	REQUIRE(image);
 	GenerateTestPatternRGB(image);
@@ -398,6 +399,54 @@ TEST_CASE("AMD BC7 Direct RGB", "[ImageCompress]") {
 	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
 
 	SAVE_DDS(dst, "compress_BC7_UNORM_32x32.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+
+TEST_CASE("RichGel999 BC7 Direct RGB", "[ImageCompress]") {
+
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
+	REQUIRE(image);
+	GenerateTestPatternRGB(image);
+	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_32x32.dds")
+
+	auto dst = Image_CompressRichGel999BC7(image, nullptr, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
+
+	SAVE_DDS(dst, "compress_richBC7_UNORM_32x32.dds")
+
+	Image_Destroy(image);
+	Image_Destroy(dst);
+}
+
+TEST_CASE("RichGel999 fast BC7 Direct RGB", "[ImageCompress]") {
+
+	auto image = Image_Create2D(32, 32, TinyImageFormat_R8G8B8_UNORM);
+	REQUIRE(image);
+	GenerateTestPatternRGB(image);
+	SAVE_DDS(image, "compress_ref_R8G8B8_UNORM_32x32.dds")
+
+	Image_CompressRichGel999BackendOptions options;
+	options.perceptual = true;
+	options.fast = true;
+
+	auto dst = Image_CompressRichGel999BC7(image, &options, nullptr, nullptr);
+
+	REQUIRE(dst);
+	REQUIRE(dst->width == image->width);
+	REQUIRE(dst->height == image->height);
+	REQUIRE(dst->depth == image->depth);
+	REQUIRE(dst->slices == image->slices);
+	REQUIRE(dst->format == TinyImageFormat_DXBC7_UNORM);
+
+	SAVE_DDS(dst, "compress_fastrichBC7_UNORM_32x32.dds")
 
 	Image_Destroy(image);
 	Image_Destroy(dst);

@@ -49,6 +49,14 @@ typedef struct Image_CompressRichGel99BackendOptions {
 	bool fast;
 } Image_CompressRichGel999BackendOptions;
 
+// some compression system (BC7 at the moment) create global tables
+// these work as ref counters for these tables. Generally only need to be
+// called if using the loweset level block API. Higher apis call them around
+// each compress image call. However if doing many may be more performant to
+// init/deinit around a block of compress calls
+AL2O3_EXTERN_C void Image_CompressInit();
+AL2O3_EXTERN_C void Image_CompressDeinit();
+
 AL2O3_EXTERN_C Image_ImageHeader const *ImageCompress_Compress(Image_CompressType type,
 																															 bool fast,
 																															 Image_ImageHeader const *src);

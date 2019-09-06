@@ -70,7 +70,7 @@ AL2O3_EXTERN_C Image_ImageHeader const *Image_CompressRichGel999BC7(Image_ImageH
 	return dst;
 }
 
-AL2O3_EXTERN_C void Image_CompressRichGel99BC7enc16(uint32_t const input[4 * 4],
+AL2O3_EXTERN_C void Image_CompressRichGel999BC7enc16(uint32_t const input[4 * 4],
 																									 bool fast,
 																									 bool perceptual,
 																									 void *out) {
