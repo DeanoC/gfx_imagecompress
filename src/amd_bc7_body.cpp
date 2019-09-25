@@ -692,17 +692,16 @@ double BC7BlockEncoder::CompressSingleIndexBlock(double in[MAX_SUBSET_SIZE][MAX_
 
 	// shakeSize gives the size of the shake cube (for ep_shaker_2_d)
 	// ep_shaker always runs on a 1x1x1 cube on both endpoints
-	uint32_t   shakeSize = 8 - (uint32_t)floor(1.5 * bti[blockMode].indexBits[0]);
-	shakeSize = Math_MaxD(2, Math_MinD((uint32_t)floor( shakeSize * m_quality + 0.5), 6));
+	uint32_t shakeSize = 8 - (uint32_t) floor(1.5 * bti[blockMode].indexBits[0]);
+	shakeSize = Math_MaxU32(2, Math_MinU32((uint32_t) floor(shakeSize * m_quality + 0.5), 6));
 
 	// Shake attempts indicates how many partitions to try to shake
-	uint32_t   numShakeAttempts = Math_MaxD(1, Math_MinD((uint32_t)floor(8 * m_quality + 0.5), partitionsToTry));
+	uint32_t numShakeAttempts = Math_MaxD(1, Math_MinD((uint32_t) floor(8 * m_quality + 0.5), partitionsToTry));
 
 	// Set up all the parameters for the shakers
 	// Must increase shake size if these block endpoints use parity
-	if((m_parityBits == SAME_PAR) ||
-			(m_parityBits == BCC))
-	{
+	if ((m_parityBits == SAME_PAR) ||
+			(m_parityBits == BCC)) {
 		shakeSize += 2;
 	}
 
@@ -1157,14 +1156,13 @@ double BC7BlockEncoder::CompressDualIndexBlock(double in[MAX_SUBSET_SIZE][MAX_DI
 			// store the result if it beats the best overall error
 			// Otherwise only run the shaking if the error is better than the best
 			// quantizer error
-			if((m_quality > g_HIGHQULITY_THRESHOLD) || (quantizerError <= bestQuantizerError))
-			{
+			if((m_quality > g_HIGHQULITY_THRESHOLD) || (quantizerError <= bestQuantizerError)) {
 				// Shake size gives the size of the shake cube
-				uint32_t   shakeSize;
+				uint32_t shakeSize;
 
-				shakeSize = Math_MaxD(2, Math_MinD( (uint32_t)(6 * m_quality), 6));
+				shakeSize = Math_MaxU32(2, Math_MinU32((uint32_t) (6 * m_quality), 6));
 
-				int     bits[2][4];
+				int bits[2][4];
 
 				// Specify number of bits for vector block
 				bits[0][COMP_RED] = m_componentBits[COMP_RED];
