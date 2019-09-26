@@ -696,7 +696,7 @@ double BC7BlockEncoder::CompressSingleIndexBlock(double in[MAX_SUBSET_SIZE][MAX_
 	shakeSize = Math_MaxU32(2, Math_MinU32((uint32_t) floor(shakeSize * m_quality + 0.5), 6));
 
 	// Shake attempts indicates how many partitions to try to shake
-	uint32_t numShakeAttempts = Math_MaxD(1, Math_MinD((uint32_t) floor(8 * m_quality + 0.5), partitionsToTry));
+	uint32_t numShakeAttempts = Math_MaxU32(1, Math_MinU32((uint32_t) floor(8 * m_quality + 0.5), partitionsToTry));
 
 	// Set up all the parameters for the shakers
 	// Must increase shake size if these block endpoints use parity
@@ -706,8 +706,7 @@ double BC7BlockEncoder::CompressSingleIndexBlock(double in[MAX_SUBSET_SIZE][MAX_
 	}
 
 	// Now do the endpoint shaking
-	for(i=0; i < numShakeAttempts; i++)
-	{
+	for (i = 0; i < numShakeAttempts; i++) {
 		double error = 0;
 
 		blockPartition = m_sortedModes[i];
